@@ -5,6 +5,7 @@
  */
 package controladores;
 
+import controladores.exceptions.IllegalOrphanException;
 import controladores.exceptions.NonexistentEntityException;
 import entidades.Jornada;
 import java.io.Serializable;
@@ -14,6 +15,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import entidades.JornadaEmpleado;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -26,7 +28,7 @@ import javax.persistence.Persistence;
 public class JornadaJpaController implements Serializable {
 
     public JornadaJpaController() {
-               this.emf = Persistence.createEntityManagerFactory("ProyectoPU") ;
+        this.emf = Persistence.createEntityManagerFactory("Proyecto1PU");
     }
     private EntityManagerFactory emf = null;
 
@@ -35,27 +37,27 @@ public class JornadaJpaController implements Serializable {
     }
 
     public void create(Jornada jornada) {
-        if (jornada.getJornadaEmpleadoList() == null) {
-            jornada.setJornadaEmpleadoList(new ArrayList<JornadaEmpleado>());
+        if (jornada.getJornadaEmpleadoCollection() == null) {
+            jornada.setJornadaEmpleadoCollection(new ArrayList<JornadaEmpleado>());
         }
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            List<JornadaEmpleado> attachedJornadaEmpleadoList = new ArrayList<JornadaEmpleado>();
-            for (JornadaEmpleado jornadaEmpleadoListJornadaEmpleadoToAttach : jornada.getJornadaEmpleadoList()) {
-                jornadaEmpleadoListJornadaEmpleadoToAttach = em.getReference(jornadaEmpleadoListJornadaEmpleadoToAttach.getClass(), jornadaEmpleadoListJornadaEmpleadoToAttach.getIdJornadaEmpleado());
-                attachedJornadaEmpleadoList.add(jornadaEmpleadoListJornadaEmpleadoToAttach);
+            Collection<JornadaEmpleado> attachedJornadaEmpleadoCollection = new ArrayList<JornadaEmpleado>();
+            for (JornadaEmpleado jornadaEmpleadoCollectionJornadaEmpleadoToAttach : jornada.getJornadaEmpleadoCollection()) {
+                jornadaEmpleadoCollectionJornadaEmpleadoToAttach = em.getReference(jornadaEmpleadoCollectionJornadaEmpleadoToAttach.getClass(), jornadaEmpleadoCollectionJornadaEmpleadoToAttach.getIdJornadaEmpleado());
+                attachedJornadaEmpleadoCollection.add(jornadaEmpleadoCollectionJornadaEmpleadoToAttach);
             }
-            jornada.setJornadaEmpleadoList(attachedJornadaEmpleadoList);
+            jornada.setJornadaEmpleadoCollection(attachedJornadaEmpleadoCollection);
             em.persist(jornada);
-            for (JornadaEmpleado jornadaEmpleadoListJornadaEmpleado : jornada.getJornadaEmpleadoList()) {
-                Jornada oldIdJornadaOfJornadaEmpleadoListJornadaEmpleado = jornadaEmpleadoListJornadaEmpleado.getIdJornada();
-                jornadaEmpleadoListJornadaEmpleado.setIdJornada(jornada);
-                jornadaEmpleadoListJornadaEmpleado = em.merge(jornadaEmpleadoListJornadaEmpleado);
-                if (oldIdJornadaOfJornadaEmpleadoListJornadaEmpleado != null) {
-                    oldIdJornadaOfJornadaEmpleadoListJornadaEmpleado.getJornadaEmpleadoList().remove(jornadaEmpleadoListJornadaEmpleado);
-                    oldIdJornadaOfJornadaEmpleadoListJornadaEmpleado = em.merge(oldIdJornadaOfJornadaEmpleadoListJornadaEmpleado);
+            for (JornadaEmpleado jornadaEmpleadoCollectionJornadaEmpleado : jornada.getJornadaEmpleadoCollection()) {
+                Jornada oldIdJornadaOfJornadaEmpleadoCollectionJornadaEmpleado = jornadaEmpleadoCollectionJornadaEmpleado.getIdJornada();
+                jornadaEmpleadoCollectionJornadaEmpleado.setIdJornada(jornada);
+                jornadaEmpleadoCollectionJornadaEmpleado = em.merge(jornadaEmpleadoCollectionJornadaEmpleado);
+                if (oldIdJornadaOfJornadaEmpleadoCollectionJornadaEmpleado != null) {
+                    oldIdJornadaOfJornadaEmpleadoCollectionJornadaEmpleado.getJornadaEmpleadoCollection().remove(jornadaEmpleadoCollectionJornadaEmpleado);
+                    oldIdJornadaOfJornadaEmpleadoCollectionJornadaEmpleado = em.merge(oldIdJornadaOfJornadaEmpleadoCollectionJornadaEmpleado);
                 }
             }
             em.getTransaction().commit();
@@ -66,36 +68,42 @@ public class JornadaJpaController implements Serializable {
         }
     }
 
-    public void edit(Jornada jornada) throws NonexistentEntityException, Exception {
+    public void edit(Jornada jornada) throws IllegalOrphanException, NonexistentEntityException, Exception {
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
             Jornada persistentJornada = em.find(Jornada.class, jornada.getIdJornada());
-            List<JornadaEmpleado> jornadaEmpleadoListOld = persistentJornada.getJornadaEmpleadoList();
-            List<JornadaEmpleado> jornadaEmpleadoListNew = jornada.getJornadaEmpleadoList();
-            List<JornadaEmpleado> attachedJornadaEmpleadoListNew = new ArrayList<JornadaEmpleado>();
-            for (JornadaEmpleado jornadaEmpleadoListNewJornadaEmpleadoToAttach : jornadaEmpleadoListNew) {
-                jornadaEmpleadoListNewJornadaEmpleadoToAttach = em.getReference(jornadaEmpleadoListNewJornadaEmpleadoToAttach.getClass(), jornadaEmpleadoListNewJornadaEmpleadoToAttach.getIdJornadaEmpleado());
-                attachedJornadaEmpleadoListNew.add(jornadaEmpleadoListNewJornadaEmpleadoToAttach);
-            }
-            jornadaEmpleadoListNew = attachedJornadaEmpleadoListNew;
-            jornada.setJornadaEmpleadoList(jornadaEmpleadoListNew);
-            jornada = em.merge(jornada);
-            for (JornadaEmpleado jornadaEmpleadoListOldJornadaEmpleado : jornadaEmpleadoListOld) {
-                if (!jornadaEmpleadoListNew.contains(jornadaEmpleadoListOldJornadaEmpleado)) {
-                    jornadaEmpleadoListOldJornadaEmpleado.setIdJornada(null);
-                    jornadaEmpleadoListOldJornadaEmpleado = em.merge(jornadaEmpleadoListOldJornadaEmpleado);
+            Collection<JornadaEmpleado> jornadaEmpleadoCollectionOld = persistentJornada.getJornadaEmpleadoCollection();
+            Collection<JornadaEmpleado> jornadaEmpleadoCollectionNew = jornada.getJornadaEmpleadoCollection();
+            List<String> illegalOrphanMessages = null;
+            for (JornadaEmpleado jornadaEmpleadoCollectionOldJornadaEmpleado : jornadaEmpleadoCollectionOld) {
+                if (!jornadaEmpleadoCollectionNew.contains(jornadaEmpleadoCollectionOldJornadaEmpleado)) {
+                    if (illegalOrphanMessages == null) {
+                        illegalOrphanMessages = new ArrayList<String>();
+                    }
+                    illegalOrphanMessages.add("You must retain JornadaEmpleado " + jornadaEmpleadoCollectionOldJornadaEmpleado + " since its idJornada field is not nullable.");
                 }
             }
-            for (JornadaEmpleado jornadaEmpleadoListNewJornadaEmpleado : jornadaEmpleadoListNew) {
-                if (!jornadaEmpleadoListOld.contains(jornadaEmpleadoListNewJornadaEmpleado)) {
-                    Jornada oldIdJornadaOfJornadaEmpleadoListNewJornadaEmpleado = jornadaEmpleadoListNewJornadaEmpleado.getIdJornada();
-                    jornadaEmpleadoListNewJornadaEmpleado.setIdJornada(jornada);
-                    jornadaEmpleadoListNewJornadaEmpleado = em.merge(jornadaEmpleadoListNewJornadaEmpleado);
-                    if (oldIdJornadaOfJornadaEmpleadoListNewJornadaEmpleado != null && !oldIdJornadaOfJornadaEmpleadoListNewJornadaEmpleado.equals(jornada)) {
-                        oldIdJornadaOfJornadaEmpleadoListNewJornadaEmpleado.getJornadaEmpleadoList().remove(jornadaEmpleadoListNewJornadaEmpleado);
-                        oldIdJornadaOfJornadaEmpleadoListNewJornadaEmpleado = em.merge(oldIdJornadaOfJornadaEmpleadoListNewJornadaEmpleado);
+            if (illegalOrphanMessages != null) {
+                throw new IllegalOrphanException(illegalOrphanMessages);
+            }
+            Collection<JornadaEmpleado> attachedJornadaEmpleadoCollectionNew = new ArrayList<JornadaEmpleado>();
+            for (JornadaEmpleado jornadaEmpleadoCollectionNewJornadaEmpleadoToAttach : jornadaEmpleadoCollectionNew) {
+                jornadaEmpleadoCollectionNewJornadaEmpleadoToAttach = em.getReference(jornadaEmpleadoCollectionNewJornadaEmpleadoToAttach.getClass(), jornadaEmpleadoCollectionNewJornadaEmpleadoToAttach.getIdJornadaEmpleado());
+                attachedJornadaEmpleadoCollectionNew.add(jornadaEmpleadoCollectionNewJornadaEmpleadoToAttach);
+            }
+            jornadaEmpleadoCollectionNew = attachedJornadaEmpleadoCollectionNew;
+            jornada.setJornadaEmpleadoCollection(jornadaEmpleadoCollectionNew);
+            jornada = em.merge(jornada);
+            for (JornadaEmpleado jornadaEmpleadoCollectionNewJornadaEmpleado : jornadaEmpleadoCollectionNew) {
+                if (!jornadaEmpleadoCollectionOld.contains(jornadaEmpleadoCollectionNewJornadaEmpleado)) {
+                    Jornada oldIdJornadaOfJornadaEmpleadoCollectionNewJornadaEmpleado = jornadaEmpleadoCollectionNewJornadaEmpleado.getIdJornada();
+                    jornadaEmpleadoCollectionNewJornadaEmpleado.setIdJornada(jornada);
+                    jornadaEmpleadoCollectionNewJornadaEmpleado = em.merge(jornadaEmpleadoCollectionNewJornadaEmpleado);
+                    if (oldIdJornadaOfJornadaEmpleadoCollectionNewJornadaEmpleado != null && !oldIdJornadaOfJornadaEmpleadoCollectionNewJornadaEmpleado.equals(jornada)) {
+                        oldIdJornadaOfJornadaEmpleadoCollectionNewJornadaEmpleado.getJornadaEmpleadoCollection().remove(jornadaEmpleadoCollectionNewJornadaEmpleado);
+                        oldIdJornadaOfJornadaEmpleadoCollectionNewJornadaEmpleado = em.merge(oldIdJornadaOfJornadaEmpleadoCollectionNewJornadaEmpleado);
                     }
                 }
             }
@@ -116,7 +124,7 @@ public class JornadaJpaController implements Serializable {
         }
     }
 
-    public void destroy(Integer id) throws NonexistentEntityException {
+    public void destroy(Integer id) throws IllegalOrphanException, NonexistentEntityException {
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -128,10 +136,16 @@ public class JornadaJpaController implements Serializable {
             } catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The jornada with id " + id + " no longer exists.", enfe);
             }
-            List<JornadaEmpleado> jornadaEmpleadoList = jornada.getJornadaEmpleadoList();
-            for (JornadaEmpleado jornadaEmpleadoListJornadaEmpleado : jornadaEmpleadoList) {
-                jornadaEmpleadoListJornadaEmpleado.setIdJornada(null);
-                jornadaEmpleadoListJornadaEmpleado = em.merge(jornadaEmpleadoListJornadaEmpleado);
+            List<String> illegalOrphanMessages = null;
+            Collection<JornadaEmpleado> jornadaEmpleadoCollectionOrphanCheck = jornada.getJornadaEmpleadoCollection();
+            for (JornadaEmpleado jornadaEmpleadoCollectionOrphanCheckJornadaEmpleado : jornadaEmpleadoCollectionOrphanCheck) {
+                if (illegalOrphanMessages == null) {
+                    illegalOrphanMessages = new ArrayList<String>();
+                }
+                illegalOrphanMessages.add("This Jornada (" + jornada + ") cannot be destroyed since the JornadaEmpleado " + jornadaEmpleadoCollectionOrphanCheckJornadaEmpleado + " in its jornadaEmpleadoCollection field has a non-nullable idJornada field.");
+            }
+            if (illegalOrphanMessages != null) {
+                throw new IllegalOrphanException(illegalOrphanMessages);
             }
             em.remove(jornada);
             em.getTransaction().commit();

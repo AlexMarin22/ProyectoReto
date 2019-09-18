@@ -11,8 +11,8 @@ import javax.persistence.Query;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
-import entidades.Empleados;
 import entidades.DetalleMarcaciones;
+import entidades.Empleados;
 import entidades.Marcaciones;
 import java.util.List;
 import javax.persistence.EntityManager;
@@ -26,7 +26,7 @@ import javax.persistence.Persistence;
 public class MarcacionesJpaController implements Serializable {
 
     public MarcacionesJpaController() {
-                this.emf = Persistence.createEntityManagerFactory("ProyectoPU") ;
+        this.emf = Persistence.createEntityManagerFactory("Proyecto1PU");
     }
     private EntityManagerFactory emf = null;
 
@@ -39,24 +39,24 @@ public class MarcacionesJpaController implements Serializable {
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            Empleados idEmpleado = marcaciones.getIdEmpleado();
-            if (idEmpleado != null) {
-                idEmpleado = em.getReference(idEmpleado.getClass(), idEmpleado.getIdEmpleado());
-                marcaciones.setIdEmpleado(idEmpleado);
-            }
             DetalleMarcaciones idDetalleMarcacion = marcaciones.getIdDetalleMarcacion();
             if (idDetalleMarcacion != null) {
-                idDetalleMarcacion = em.getReference(idDetalleMarcacion.getClass(), idDetalleMarcacion.getIdDetalleMarcacion());
+                idDetalleMarcacion = em.getReference(idDetalleMarcacion.getClass(), idDetalleMarcacion.getIdDetalleMarcaciones());
                 marcaciones.setIdDetalleMarcacion(idDetalleMarcacion);
             }
-            em.persist(marcaciones);
+            Empleados idEmpleado = marcaciones.getIdEmpleado();
             if (idEmpleado != null) {
-                idEmpleado.getMarcacionesList().add(marcaciones);
-                idEmpleado = em.merge(idEmpleado);
+                idEmpleado = em.getReference(idEmpleado.getClass(), idEmpleado.getIdEmpleados());
+                marcaciones.setIdEmpleado(idEmpleado);
             }
+            em.persist(marcaciones);
             if (idDetalleMarcacion != null) {
-                idDetalleMarcacion.getMarcacionesList().add(marcaciones);
+                idDetalleMarcacion.getMarcacionesCollection().add(marcaciones);
                 idDetalleMarcacion = em.merge(idDetalleMarcacion);
+            }
+            if (idEmpleado != null) {
+                idEmpleado.getMarcacionesCollection().add(marcaciones);
+                idEmpleado = em.merge(idEmpleado);
             }
             em.getTransaction().commit();
         } finally {
@@ -71,41 +71,41 @@ public class MarcacionesJpaController implements Serializable {
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            Marcaciones persistentMarcaciones = em.find(Marcaciones.class, marcaciones.getIdMarcacion());
-            Empleados idEmpleadoOld = persistentMarcaciones.getIdEmpleado();
-            Empleados idEmpleadoNew = marcaciones.getIdEmpleado();
+            Marcaciones persistentMarcaciones = em.find(Marcaciones.class, marcaciones.getIdMarcaciones());
             DetalleMarcaciones idDetalleMarcacionOld = persistentMarcaciones.getIdDetalleMarcacion();
             DetalleMarcaciones idDetalleMarcacionNew = marcaciones.getIdDetalleMarcacion();
-            if (idEmpleadoNew != null) {
-                idEmpleadoNew = em.getReference(idEmpleadoNew.getClass(), idEmpleadoNew.getIdEmpleado());
-                marcaciones.setIdEmpleado(idEmpleadoNew);
-            }
+            Empleados idEmpleadoOld = persistentMarcaciones.getIdEmpleado();
+            Empleados idEmpleadoNew = marcaciones.getIdEmpleado();
             if (idDetalleMarcacionNew != null) {
-                idDetalleMarcacionNew = em.getReference(idDetalleMarcacionNew.getClass(), idDetalleMarcacionNew.getIdDetalleMarcacion());
+                idDetalleMarcacionNew = em.getReference(idDetalleMarcacionNew.getClass(), idDetalleMarcacionNew.getIdDetalleMarcaciones());
                 marcaciones.setIdDetalleMarcacion(idDetalleMarcacionNew);
             }
+            if (idEmpleadoNew != null) {
+                idEmpleadoNew = em.getReference(idEmpleadoNew.getClass(), idEmpleadoNew.getIdEmpleados());
+                marcaciones.setIdEmpleado(idEmpleadoNew);
+            }
             marcaciones = em.merge(marcaciones);
-            if (idEmpleadoOld != null && !idEmpleadoOld.equals(idEmpleadoNew)) {
-                idEmpleadoOld.getMarcacionesList().remove(marcaciones);
-                idEmpleadoOld = em.merge(idEmpleadoOld);
-            }
-            if (idEmpleadoNew != null && !idEmpleadoNew.equals(idEmpleadoOld)) {
-                idEmpleadoNew.getMarcacionesList().add(marcaciones);
-                idEmpleadoNew = em.merge(idEmpleadoNew);
-            }
             if (idDetalleMarcacionOld != null && !idDetalleMarcacionOld.equals(idDetalleMarcacionNew)) {
-                idDetalleMarcacionOld.getMarcacionesList().remove(marcaciones);
+                idDetalleMarcacionOld.getMarcacionesCollection().remove(marcaciones);
                 idDetalleMarcacionOld = em.merge(idDetalleMarcacionOld);
             }
             if (idDetalleMarcacionNew != null && !idDetalleMarcacionNew.equals(idDetalleMarcacionOld)) {
-                idDetalleMarcacionNew.getMarcacionesList().add(marcaciones);
+                idDetalleMarcacionNew.getMarcacionesCollection().add(marcaciones);
                 idDetalleMarcacionNew = em.merge(idDetalleMarcacionNew);
+            }
+            if (idEmpleadoOld != null && !idEmpleadoOld.equals(idEmpleadoNew)) {
+                idEmpleadoOld.getMarcacionesCollection().remove(marcaciones);
+                idEmpleadoOld = em.merge(idEmpleadoOld);
+            }
+            if (idEmpleadoNew != null && !idEmpleadoNew.equals(idEmpleadoOld)) {
+                idEmpleadoNew.getMarcacionesCollection().add(marcaciones);
+                idEmpleadoNew = em.merge(idEmpleadoNew);
             }
             em.getTransaction().commit();
         } catch (Exception ex) {
             String msg = ex.getLocalizedMessage();
             if (msg == null || msg.length() == 0) {
-                Integer id = marcaciones.getIdMarcacion();
+                Integer id = marcaciones.getIdMarcaciones();
                 if (findMarcaciones(id) == null) {
                     throw new NonexistentEntityException("The marcaciones with id " + id + " no longer exists.");
                 }
@@ -126,19 +126,19 @@ public class MarcacionesJpaController implements Serializable {
             Marcaciones marcaciones;
             try {
                 marcaciones = em.getReference(Marcaciones.class, id);
-                marcaciones.getIdMarcacion();
+                marcaciones.getIdMarcaciones();
             } catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The marcaciones with id " + id + " no longer exists.", enfe);
             }
-            Empleados idEmpleado = marcaciones.getIdEmpleado();
-            if (idEmpleado != null) {
-                idEmpleado.getMarcacionesList().remove(marcaciones);
-                idEmpleado = em.merge(idEmpleado);
-            }
             DetalleMarcaciones idDetalleMarcacion = marcaciones.getIdDetalleMarcacion();
             if (idDetalleMarcacion != null) {
-                idDetalleMarcacion.getMarcacionesList().remove(marcaciones);
+                idDetalleMarcacion.getMarcacionesCollection().remove(marcaciones);
                 idDetalleMarcacion = em.merge(idDetalleMarcacion);
+            }
+            Empleados idEmpleado = marcaciones.getIdEmpleado();
+            if (idEmpleado != null) {
+                idEmpleado.getMarcacionesCollection().remove(marcaciones);
+                idEmpleado = em.merge(idEmpleado);
             }
             em.remove(marcaciones);
             em.getTransaction().commit();

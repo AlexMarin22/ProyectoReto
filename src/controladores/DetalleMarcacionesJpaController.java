@@ -5,6 +5,7 @@
  */
 package controladores;
 
+import controladores.exceptions.IllegalOrphanException;
 import controladores.exceptions.NonexistentEntityException;
 import entidades.DetalleMarcaciones;
 import java.io.Serializable;
@@ -14,6 +15,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import entidades.Marcaciones;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -26,7 +28,7 @@ import javax.persistence.Persistence;
 public class DetalleMarcacionesJpaController implements Serializable {
 
     public DetalleMarcacionesJpaController() {
-        this.emf = Persistence.createEntityManagerFactory("ProyectoPU") ;
+        this.emf = Persistence.createEntityManagerFactory("Proyecto1PU");
     }
     private EntityManagerFactory emf = null;
 
@@ -35,27 +37,27 @@ public class DetalleMarcacionesJpaController implements Serializable {
     }
 
     public void create(DetalleMarcaciones detalleMarcaciones) {
-        if (detalleMarcaciones.getMarcacionesList() == null) {
-            detalleMarcaciones.setMarcacionesList(new ArrayList<Marcaciones>());
+        if (detalleMarcaciones.getMarcacionesCollection() == null) {
+            detalleMarcaciones.setMarcacionesCollection(new ArrayList<Marcaciones>());
         }
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            List<Marcaciones> attachedMarcacionesList = new ArrayList<Marcaciones>();
-            for (Marcaciones marcacionesListMarcacionesToAttach : detalleMarcaciones.getMarcacionesList()) {
-                marcacionesListMarcacionesToAttach = em.getReference(marcacionesListMarcacionesToAttach.getClass(), marcacionesListMarcacionesToAttach.getIdMarcacion());
-                attachedMarcacionesList.add(marcacionesListMarcacionesToAttach);
+            Collection<Marcaciones> attachedMarcacionesCollection = new ArrayList<Marcaciones>();
+            for (Marcaciones marcacionesCollectionMarcacionesToAttach : detalleMarcaciones.getMarcacionesCollection()) {
+                marcacionesCollectionMarcacionesToAttach = em.getReference(marcacionesCollectionMarcacionesToAttach.getClass(), marcacionesCollectionMarcacionesToAttach.getIdMarcaciones());
+                attachedMarcacionesCollection.add(marcacionesCollectionMarcacionesToAttach);
             }
-            detalleMarcaciones.setMarcacionesList(attachedMarcacionesList);
+            detalleMarcaciones.setMarcacionesCollection(attachedMarcacionesCollection);
             em.persist(detalleMarcaciones);
-            for (Marcaciones marcacionesListMarcaciones : detalleMarcaciones.getMarcacionesList()) {
-                DetalleMarcaciones oldIdDetalleMarcacionOfMarcacionesListMarcaciones = marcacionesListMarcaciones.getIdDetalleMarcacion();
-                marcacionesListMarcaciones.setIdDetalleMarcacion(detalleMarcaciones);
-                marcacionesListMarcaciones = em.merge(marcacionesListMarcaciones);
-                if (oldIdDetalleMarcacionOfMarcacionesListMarcaciones != null) {
-                    oldIdDetalleMarcacionOfMarcacionesListMarcaciones.getMarcacionesList().remove(marcacionesListMarcaciones);
-                    oldIdDetalleMarcacionOfMarcacionesListMarcaciones = em.merge(oldIdDetalleMarcacionOfMarcacionesListMarcaciones);
+            for (Marcaciones marcacionesCollectionMarcaciones : detalleMarcaciones.getMarcacionesCollection()) {
+                DetalleMarcaciones oldIdDetalleMarcacionOfMarcacionesCollectionMarcaciones = marcacionesCollectionMarcaciones.getIdDetalleMarcacion();
+                marcacionesCollectionMarcaciones.setIdDetalleMarcacion(detalleMarcaciones);
+                marcacionesCollectionMarcaciones = em.merge(marcacionesCollectionMarcaciones);
+                if (oldIdDetalleMarcacionOfMarcacionesCollectionMarcaciones != null) {
+                    oldIdDetalleMarcacionOfMarcacionesCollectionMarcaciones.getMarcacionesCollection().remove(marcacionesCollectionMarcaciones);
+                    oldIdDetalleMarcacionOfMarcacionesCollectionMarcaciones = em.merge(oldIdDetalleMarcacionOfMarcacionesCollectionMarcaciones);
                 }
             }
             em.getTransaction().commit();
@@ -66,36 +68,42 @@ public class DetalleMarcacionesJpaController implements Serializable {
         }
     }
 
-    public void edit(DetalleMarcaciones detalleMarcaciones) throws NonexistentEntityException, Exception {
+    public void edit(DetalleMarcaciones detalleMarcaciones) throws IllegalOrphanException, NonexistentEntityException, Exception {
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            DetalleMarcaciones persistentDetalleMarcaciones = em.find(DetalleMarcaciones.class, detalleMarcaciones.getIdDetalleMarcacion());
-            List<Marcaciones> marcacionesListOld = persistentDetalleMarcaciones.getMarcacionesList();
-            List<Marcaciones> marcacionesListNew = detalleMarcaciones.getMarcacionesList();
-            List<Marcaciones> attachedMarcacionesListNew = new ArrayList<Marcaciones>();
-            for (Marcaciones marcacionesListNewMarcacionesToAttach : marcacionesListNew) {
-                marcacionesListNewMarcacionesToAttach = em.getReference(marcacionesListNewMarcacionesToAttach.getClass(), marcacionesListNewMarcacionesToAttach.getIdMarcacion());
-                attachedMarcacionesListNew.add(marcacionesListNewMarcacionesToAttach);
-            }
-            marcacionesListNew = attachedMarcacionesListNew;
-            detalleMarcaciones.setMarcacionesList(marcacionesListNew);
-            detalleMarcaciones = em.merge(detalleMarcaciones);
-            for (Marcaciones marcacionesListOldMarcaciones : marcacionesListOld) {
-                if (!marcacionesListNew.contains(marcacionesListOldMarcaciones)) {
-                    marcacionesListOldMarcaciones.setIdDetalleMarcacion(null);
-                    marcacionesListOldMarcaciones = em.merge(marcacionesListOldMarcaciones);
+            DetalleMarcaciones persistentDetalleMarcaciones = em.find(DetalleMarcaciones.class, detalleMarcaciones.getIdDetalleMarcaciones());
+            Collection<Marcaciones> marcacionesCollectionOld = persistentDetalleMarcaciones.getMarcacionesCollection();
+            Collection<Marcaciones> marcacionesCollectionNew = detalleMarcaciones.getMarcacionesCollection();
+            List<String> illegalOrphanMessages = null;
+            for (Marcaciones marcacionesCollectionOldMarcaciones : marcacionesCollectionOld) {
+                if (!marcacionesCollectionNew.contains(marcacionesCollectionOldMarcaciones)) {
+                    if (illegalOrphanMessages == null) {
+                        illegalOrphanMessages = new ArrayList<String>();
+                    }
+                    illegalOrphanMessages.add("You must retain Marcaciones " + marcacionesCollectionOldMarcaciones + " since its idDetalleMarcacion field is not nullable.");
                 }
             }
-            for (Marcaciones marcacionesListNewMarcaciones : marcacionesListNew) {
-                if (!marcacionesListOld.contains(marcacionesListNewMarcaciones)) {
-                    DetalleMarcaciones oldIdDetalleMarcacionOfMarcacionesListNewMarcaciones = marcacionesListNewMarcaciones.getIdDetalleMarcacion();
-                    marcacionesListNewMarcaciones.setIdDetalleMarcacion(detalleMarcaciones);
-                    marcacionesListNewMarcaciones = em.merge(marcacionesListNewMarcaciones);
-                    if (oldIdDetalleMarcacionOfMarcacionesListNewMarcaciones != null && !oldIdDetalleMarcacionOfMarcacionesListNewMarcaciones.equals(detalleMarcaciones)) {
-                        oldIdDetalleMarcacionOfMarcacionesListNewMarcaciones.getMarcacionesList().remove(marcacionesListNewMarcaciones);
-                        oldIdDetalleMarcacionOfMarcacionesListNewMarcaciones = em.merge(oldIdDetalleMarcacionOfMarcacionesListNewMarcaciones);
+            if (illegalOrphanMessages != null) {
+                throw new IllegalOrphanException(illegalOrphanMessages);
+            }
+            Collection<Marcaciones> attachedMarcacionesCollectionNew = new ArrayList<Marcaciones>();
+            for (Marcaciones marcacionesCollectionNewMarcacionesToAttach : marcacionesCollectionNew) {
+                marcacionesCollectionNewMarcacionesToAttach = em.getReference(marcacionesCollectionNewMarcacionesToAttach.getClass(), marcacionesCollectionNewMarcacionesToAttach.getIdMarcaciones());
+                attachedMarcacionesCollectionNew.add(marcacionesCollectionNewMarcacionesToAttach);
+            }
+            marcacionesCollectionNew = attachedMarcacionesCollectionNew;
+            detalleMarcaciones.setMarcacionesCollection(marcacionesCollectionNew);
+            detalleMarcaciones = em.merge(detalleMarcaciones);
+            for (Marcaciones marcacionesCollectionNewMarcaciones : marcacionesCollectionNew) {
+                if (!marcacionesCollectionOld.contains(marcacionesCollectionNewMarcaciones)) {
+                    DetalleMarcaciones oldIdDetalleMarcacionOfMarcacionesCollectionNewMarcaciones = marcacionesCollectionNewMarcaciones.getIdDetalleMarcacion();
+                    marcacionesCollectionNewMarcaciones.setIdDetalleMarcacion(detalleMarcaciones);
+                    marcacionesCollectionNewMarcaciones = em.merge(marcacionesCollectionNewMarcaciones);
+                    if (oldIdDetalleMarcacionOfMarcacionesCollectionNewMarcaciones != null && !oldIdDetalleMarcacionOfMarcacionesCollectionNewMarcaciones.equals(detalleMarcaciones)) {
+                        oldIdDetalleMarcacionOfMarcacionesCollectionNewMarcaciones.getMarcacionesCollection().remove(marcacionesCollectionNewMarcaciones);
+                        oldIdDetalleMarcacionOfMarcacionesCollectionNewMarcaciones = em.merge(oldIdDetalleMarcacionOfMarcacionesCollectionNewMarcaciones);
                     }
                 }
             }
@@ -103,7 +111,7 @@ public class DetalleMarcacionesJpaController implements Serializable {
         } catch (Exception ex) {
             String msg = ex.getLocalizedMessage();
             if (msg == null || msg.length() == 0) {
-                Integer id = detalleMarcaciones.getIdDetalleMarcacion();
+                Integer id = detalleMarcaciones.getIdDetalleMarcaciones();
                 if (findDetalleMarcaciones(id) == null) {
                     throw new NonexistentEntityException("The detalleMarcaciones with id " + id + " no longer exists.");
                 }
@@ -116,7 +124,7 @@ public class DetalleMarcacionesJpaController implements Serializable {
         }
     }
 
-    public void destroy(Integer id) throws NonexistentEntityException {
+    public void destroy(Integer id) throws IllegalOrphanException, NonexistentEntityException {
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -124,14 +132,20 @@ public class DetalleMarcacionesJpaController implements Serializable {
             DetalleMarcaciones detalleMarcaciones;
             try {
                 detalleMarcaciones = em.getReference(DetalleMarcaciones.class, id);
-                detalleMarcaciones.getIdDetalleMarcacion();
+                detalleMarcaciones.getIdDetalleMarcaciones();
             } catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The detalleMarcaciones with id " + id + " no longer exists.", enfe);
             }
-            List<Marcaciones> marcacionesList = detalleMarcaciones.getMarcacionesList();
-            for (Marcaciones marcacionesListMarcaciones : marcacionesList) {
-                marcacionesListMarcaciones.setIdDetalleMarcacion(null);
-                marcacionesListMarcaciones = em.merge(marcacionesListMarcaciones);
+            List<String> illegalOrphanMessages = null;
+            Collection<Marcaciones> marcacionesCollectionOrphanCheck = detalleMarcaciones.getMarcacionesCollection();
+            for (Marcaciones marcacionesCollectionOrphanCheckMarcaciones : marcacionesCollectionOrphanCheck) {
+                if (illegalOrphanMessages == null) {
+                    illegalOrphanMessages = new ArrayList<String>();
+                }
+                illegalOrphanMessages.add("This DetalleMarcaciones (" + detalleMarcaciones + ") cannot be destroyed since the Marcaciones " + marcacionesCollectionOrphanCheckMarcaciones + " in its marcacionesCollection field has a non-nullable idDetalleMarcacion field.");
+            }
+            if (illegalOrphanMessages != null) {
+                throw new IllegalOrphanException(illegalOrphanMessages);
             }
             em.remove(detalleMarcaciones);
             em.getTransaction().commit();

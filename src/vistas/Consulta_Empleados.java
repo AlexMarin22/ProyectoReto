@@ -79,10 +79,10 @@ public class Consulta_Empleados extends javax.swing.JDialog {
             List<Empleados> list = cemp.findEmpleadosEntities();
             for (int i = 0; i < list.size(); i++) {
                 modelo2.addRow(O);
-                modelo2.setValueAt(list.get(i).getIdEmpleado(), i, 0);
+                modelo2.setValueAt(list.get(i).getIdEmpleados(), i, 0);
                 modelo2.setValueAt(list.get(i).getCedula(), i, 1);
-                modelo2.setValueAt(list.get(i).getNombres(), i, 2);
-                modelo2.setValueAt(list.get(i).getApellidos(), i,3);
+                modelo2.setValueAt(list.get(i).getNombre(), i, 2);
+                modelo2.setValueAt(list.get(i).getApellido(), i,3);
                 modelo2.setValueAt(list.get(i).getObservacion(), i,4);
                 modelo2.setValueAt(list.get(i).getEstado(), i, 5);
             }
@@ -300,9 +300,9 @@ Integer a = null;
         Empleados objeto1 = null;
         System.out.println("HOLAAAA");
         for (int i = 0; i < listarobj.size(); i++) {
-             if (Objects.equals(listarobj.get(i).getIdEmpleado(), id)) {
+             if (Objects.equals(listarobj.get(i).getIdEmpleados(), id)) {
                 objeto1 = listarobj.get(i);
-                 System.out.println("Error.." + objeto1.getIdEmpleado());
+                 System.out.println("Error.." + objeto1.getIdEmpleados());
             }
         }
         return objeto1;

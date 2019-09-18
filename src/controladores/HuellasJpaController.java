@@ -25,7 +25,7 @@ import javax.persistence.Persistence;
 public class HuellasJpaController implements Serializable {
 
     public HuellasJpaController() {
-        this.emf = Persistence.createEntityManagerFactory("ProyectoPU");
+        this.emf = Persistence.createEntityManagerFactory("Proyecto1PU");
     }
     private EntityManagerFactory emf = null;
 
@@ -38,15 +38,15 @@ public class HuellasJpaController implements Serializable {
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            Empleados idEmpleado = huellas.getIdEmpleado();
-            if (idEmpleado != null) {
-                idEmpleado = em.getReference(idEmpleado.getClass(), idEmpleado.getIdEmpleado());
-                huellas.setIdEmpleado(idEmpleado);
+            Empleados idEmpleados = huellas.getIdEmpleados();
+            if (idEmpleados != null) {
+                idEmpleados = em.getReference(idEmpleados.getClass(), idEmpleados.getIdEmpleados());
+                huellas.setIdEmpleados(idEmpleados);
             }
             em.persist(huellas);
-            if (idEmpleado != null) {
-                idEmpleado.getHuellasList().add(huellas);
-                idEmpleado = em.merge(idEmpleado);
+            if (idEmpleados != null) {
+                idEmpleados.getHuellasCollection().add(huellas);
+                idEmpleados = em.merge(idEmpleados);
             }
             em.getTransaction().commit();
         } finally {
@@ -61,27 +61,27 @@ public class HuellasJpaController implements Serializable {
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            Huellas persistentHuellas = em.find(Huellas.class, huellas.getIdHuella());
-            Empleados idEmpleadoOld = persistentHuellas.getIdEmpleado();
-            Empleados idEmpleadoNew = huellas.getIdEmpleado();
-            if (idEmpleadoNew != null) {
-                idEmpleadoNew = em.getReference(idEmpleadoNew.getClass(), idEmpleadoNew.getIdEmpleado());
-                huellas.setIdEmpleado(idEmpleadoNew);
+            Huellas persistentHuellas = em.find(Huellas.class, huellas.getIdHuellas());
+            Empleados idEmpleadosOld = persistentHuellas.getIdEmpleados();
+            Empleados idEmpleadosNew = huellas.getIdEmpleados();
+            if (idEmpleadosNew != null) {
+                idEmpleadosNew = em.getReference(idEmpleadosNew.getClass(), idEmpleadosNew.getIdEmpleados());
+                huellas.setIdEmpleados(idEmpleadosNew);
             }
             huellas = em.merge(huellas);
-            if (idEmpleadoOld != null && !idEmpleadoOld.equals(idEmpleadoNew)) {
-                idEmpleadoOld.getHuellasList().remove(huellas);
-                idEmpleadoOld = em.merge(idEmpleadoOld);
+            if (idEmpleadosOld != null && !idEmpleadosOld.equals(idEmpleadosNew)) {
+                idEmpleadosOld.getHuellasCollection().remove(huellas);
+                idEmpleadosOld = em.merge(idEmpleadosOld);
             }
-            if (idEmpleadoNew != null && !idEmpleadoNew.equals(idEmpleadoOld)) {
-                idEmpleadoNew.getHuellasList().add(huellas);
-                idEmpleadoNew = em.merge(idEmpleadoNew);
+            if (idEmpleadosNew != null && !idEmpleadosNew.equals(idEmpleadosOld)) {
+                idEmpleadosNew.getHuellasCollection().add(huellas);
+                idEmpleadosNew = em.merge(idEmpleadosNew);
             }
             em.getTransaction().commit();
         } catch (Exception ex) {
             String msg = ex.getLocalizedMessage();
             if (msg == null || msg.length() == 0) {
-                Integer id = huellas.getIdHuella();
+                Integer id = huellas.getIdHuellas();
                 if (findHuellas(id) == null) {
                     throw new NonexistentEntityException("The huellas with id " + id + " no longer exists.");
                 }
@@ -102,14 +102,14 @@ public class HuellasJpaController implements Serializable {
             Huellas huellas;
             try {
                 huellas = em.getReference(Huellas.class, id);
-                huellas.getIdHuella();
+                huellas.getIdHuellas();
             } catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The huellas with id " + id + " no longer exists.", enfe);
             }
-            Empleados idEmpleado = huellas.getIdEmpleado();
-            if (idEmpleado != null) {
-                idEmpleado.getHuellasList().remove(huellas);
-                idEmpleado = em.merge(idEmpleado);
+            Empleados idEmpleados = huellas.getIdEmpleados();
+            if (idEmpleados != null) {
+                idEmpleados.getHuellasCollection().remove(huellas);
+                idEmpleados = em.merge(idEmpleados);
             }
             em.remove(huellas);
             em.getTransaction().commit();
@@ -165,5 +165,5 @@ public class HuellasJpaController implements Serializable {
             em.close();
         }
     }
-
+    
 }

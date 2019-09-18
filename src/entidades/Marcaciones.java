@@ -14,6 +14,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
@@ -31,48 +32,55 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "Marcaciones.findAll", query = "SELECT m FROM Marcaciones m")
-    , @NamedQuery(name = "Marcaciones.findByIdMarcacion", query = "SELECT m FROM Marcaciones m WHERE m.idMarcacion = :idMarcacion")
-    , @NamedQuery(name = "Marcaciones.findByFecha", query = "SELECT m FROM Marcaciones m WHERE m.fecha = :fecha")
-    , @NamedQuery(name = "Marcaciones.findByObservacion", query = "SELECT m FROM Marcaciones m WHERE m.observacion = :observacion")
-    , @NamedQuery(name = "Marcaciones.findByEstado", query = "SELECT m FROM Marcaciones m WHERE m.estado = :estado")
-    , @NamedQuery(name = "Marcaciones.findByMarcacionescol", query = "SELECT m FROM Marcaciones m WHERE m.marcacionescol = :marcacionescol")})
+    , @NamedQuery(name = "Marcaciones.findByIdMarcaciones", query = "SELECT m FROM Marcaciones m WHERE m.idMarcaciones = :idMarcaciones")
+    , @NamedQuery(name = "Marcaciones.findByFecha", query = "SELECT m FROM Marcaciones m WHERE m.fecha = :fecha")})
 public class Marcaciones implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
-    @Column(name = "id_marcacion")
-    private Integer idMarcacion;
+    @Column(name = "id_marcaciones")
+    private Integer idMarcaciones;
+    @Basic(optional = false)
     @Column(name = "fecha")
     @Temporal(TemporalType.TIMESTAMP)
     private Date fecha;
+    @Basic(optional = false)
+    @Lob
     @Column(name = "observacion")
     private String observacion;
+    @Basic(optional = false)
+    @Lob
     @Column(name = "estado")
     private String estado;
-    @Column(name = "marcacionescol")
-    private String marcacionescol;
-    @JoinColumn(name = "id_empleado", referencedColumnName = "id_empleado")
-    @ManyToOne
-    private Empleados idEmpleado;
-    @JoinColumn(name = "id_detalle_marcacion", referencedColumnName = "id_detalle_marcacion")
-    @ManyToOne
+    @JoinColumn(name = "id_detalle_marcacion", referencedColumnName = "id_detalle_marcaciones")
+    @ManyToOne(optional = false)
     private DetalleMarcaciones idDetalleMarcacion;
+    @JoinColumn(name = "id_empleado", referencedColumnName = "id_empleados")
+    @ManyToOne(optional = false)
+    private Empleados idEmpleado;
 
     public Marcaciones() {
     }
 
-    public Marcaciones(Integer idMarcacion) {
-        this.idMarcacion = idMarcacion;
+    public Marcaciones(Integer idMarcaciones) {
+        this.idMarcaciones = idMarcaciones;
     }
 
-    public Integer getIdMarcacion() {
-        return idMarcacion;
+    public Marcaciones(Integer idMarcaciones, Date fecha, String observacion, String estado) {
+        this.idMarcaciones = idMarcaciones;
+        this.fecha = fecha;
+        this.observacion = observacion;
+        this.estado = estado;
     }
 
-    public void setIdMarcacion(Integer idMarcacion) {
-        this.idMarcacion = idMarcacion;
+    public Integer getIdMarcaciones() {
+        return idMarcaciones;
+    }
+
+    public void setIdMarcaciones(Integer idMarcaciones) {
+        this.idMarcaciones = idMarcaciones;
     }
 
     public Date getFecha() {
@@ -99,12 +107,12 @@ public class Marcaciones implements Serializable {
         this.estado = estado;
     }
 
-    public String getMarcacionescol() {
-        return marcacionescol;
+    public DetalleMarcaciones getIdDetalleMarcacion() {
+        return idDetalleMarcacion;
     }
 
-    public void setMarcacionescol(String marcacionescol) {
-        this.marcacionescol = marcacionescol;
+    public void setIdDetalleMarcacion(DetalleMarcaciones idDetalleMarcacion) {
+        this.idDetalleMarcacion = idDetalleMarcacion;
     }
 
     public Empleados getIdEmpleado() {
@@ -115,18 +123,10 @@ public class Marcaciones implements Serializable {
         this.idEmpleado = idEmpleado;
     }
 
-    public DetalleMarcaciones getIdDetalleMarcacion() {
-        return idDetalleMarcacion;
-    }
-
-    public void setIdDetalleMarcacion(DetalleMarcaciones idDetalleMarcacion) {
-        this.idDetalleMarcacion = idDetalleMarcacion;
-    }
-
     @Override
     public int hashCode() {
         int hash = 0;
-        hash += (idMarcacion != null ? idMarcacion.hashCode() : 0);
+        hash += (idMarcaciones != null ? idMarcaciones.hashCode() : 0);
         return hash;
     }
 
@@ -137,7 +137,7 @@ public class Marcaciones implements Serializable {
             return false;
         }
         Marcaciones other = (Marcaciones) object;
-        if ((this.idMarcacion == null && other.idMarcacion != null) || (this.idMarcacion != null && !this.idMarcacion.equals(other.idMarcacion))) {
+        if ((this.idMarcaciones == null && other.idMarcaciones != null) || (this.idMarcaciones != null && !this.idMarcaciones.equals(other.idMarcaciones))) {
             return false;
         }
         return true;
@@ -145,7 +145,7 @@ public class Marcaciones implements Serializable {
 
     @Override
     public String toString() {
-        return "entidades.Marcaciones[ idMarcacion=" + idMarcacion + " ]";
+        return "entidades.Marcaciones[ idMarcaciones=" + idMarcaciones + " ]";
     }
     
 }

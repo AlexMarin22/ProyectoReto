@@ -12,8 +12,8 @@ import javax.persistence.EntityNotFoundException;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import entidades.Empleados;
+import entidades.Rol;
 import entidades.RolEmpleados;
-import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -26,7 +26,7 @@ import javax.persistence.Persistence;
 public class RolEmpleadosJpaController implements Serializable {
 
     public RolEmpleadosJpaController() {
-        this.emf = Persistence.createEntityManagerFactory("ProyectoPU");
+        this.emf = Persistence.createEntityManagerFactory("Proyecto1PU");
     }
     private EntityManagerFactory emf = null;
 
@@ -35,28 +35,28 @@ public class RolEmpleadosJpaController implements Serializable {
     }
 
     public void create(RolEmpleados rolEmpleados) {
-        if (rolEmpleados.getEmpleadosList() == null) {
-            rolEmpleados.setEmpleadosList(new ArrayList<Empleados>());
-        }
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            List<Empleados> attachedEmpleadosList = new ArrayList<Empleados>();
-            for (Empleados empleadosListEmpleadosToAttach : rolEmpleados.getEmpleadosList()) {
-                empleadosListEmpleadosToAttach = em.getReference(empleadosListEmpleadosToAttach.getClass(), empleadosListEmpleadosToAttach.getIdEmpleado());
-                attachedEmpleadosList.add(empleadosListEmpleadosToAttach);
+            Empleados idEmpleados = rolEmpleados.getIdEmpleados();
+            if (idEmpleados != null) {
+                idEmpleados = em.getReference(idEmpleados.getClass(), idEmpleados.getIdEmpleados());
+                rolEmpleados.setIdEmpleados(idEmpleados);
             }
-            rolEmpleados.setEmpleadosList(attachedEmpleadosList);
+            Rol idRol = rolEmpleados.getIdRol();
+            if (idRol != null) {
+                idRol = em.getReference(idRol.getClass(), idRol.getIdRol());
+                rolEmpleados.setIdRol(idRol);
+            }
             em.persist(rolEmpleados);
-            for (Empleados empleadosListEmpleados : rolEmpleados.getEmpleadosList()) {
-                RolEmpleados oldIdRolEmpleadosOfEmpleadosListEmpleados = empleadosListEmpleados.getIdRolEmpleados();
-                empleadosListEmpleados.setIdRolEmpleados(rolEmpleados);
-                empleadosListEmpleados = em.merge(empleadosListEmpleados);
-                if (oldIdRolEmpleadosOfEmpleadosListEmpleados != null) {
-                    oldIdRolEmpleadosOfEmpleadosListEmpleados.getEmpleadosList().remove(empleadosListEmpleados);
-                    oldIdRolEmpleadosOfEmpleadosListEmpleados = em.merge(oldIdRolEmpleadosOfEmpleadosListEmpleados);
-                }
+            if (idEmpleados != null) {
+                idEmpleados.getRolEmpleadosCollection().add(rolEmpleados);
+                idEmpleados = em.merge(idEmpleados);
+            }
+            if (idRol != null) {
+                idRol.getRolEmpleadosCollection().add(rolEmpleados);
+                idRol = em.merge(idRol);
             }
             em.getTransaction().commit();
         } finally {
@@ -72,32 +72,34 @@ public class RolEmpleadosJpaController implements Serializable {
             em = getEntityManager();
             em.getTransaction().begin();
             RolEmpleados persistentRolEmpleados = em.find(RolEmpleados.class, rolEmpleados.getIdRolEmpleados());
-            List<Empleados> empleadosListOld = persistentRolEmpleados.getEmpleadosList();
-            List<Empleados> empleadosListNew = rolEmpleados.getEmpleadosList();
-            List<Empleados> attachedEmpleadosListNew = new ArrayList<Empleados>();
-            for (Empleados empleadosListNewEmpleadosToAttach : empleadosListNew) {
-                empleadosListNewEmpleadosToAttach = em.getReference(empleadosListNewEmpleadosToAttach.getClass(), empleadosListNewEmpleadosToAttach.getIdEmpleado());
-                attachedEmpleadosListNew.add(empleadosListNewEmpleadosToAttach);
+            Empleados idEmpleadosOld = persistentRolEmpleados.getIdEmpleados();
+            Empleados idEmpleadosNew = rolEmpleados.getIdEmpleados();
+            Rol idRolOld = persistentRolEmpleados.getIdRol();
+            Rol idRolNew = rolEmpleados.getIdRol();
+            if (idEmpleadosNew != null) {
+                idEmpleadosNew = em.getReference(idEmpleadosNew.getClass(), idEmpleadosNew.getIdEmpleados());
+                rolEmpleados.setIdEmpleados(idEmpleadosNew);
             }
-            empleadosListNew = attachedEmpleadosListNew;
-            rolEmpleados.setEmpleadosList(empleadosListNew);
+            if (idRolNew != null) {
+                idRolNew = em.getReference(idRolNew.getClass(), idRolNew.getIdRol());
+                rolEmpleados.setIdRol(idRolNew);
+            }
             rolEmpleados = em.merge(rolEmpleados);
-            for (Empleados empleadosListOldEmpleados : empleadosListOld) {
-                if (!empleadosListNew.contains(empleadosListOldEmpleados)) {
-                    empleadosListOldEmpleados.setIdRolEmpleados(null);
-                    empleadosListOldEmpleados = em.merge(empleadosListOldEmpleados);
-                }
+            if (idEmpleadosOld != null && !idEmpleadosOld.equals(idEmpleadosNew)) {
+                idEmpleadosOld.getRolEmpleadosCollection().remove(rolEmpleados);
+                idEmpleadosOld = em.merge(idEmpleadosOld);
             }
-            for (Empleados empleadosListNewEmpleados : empleadosListNew) {
-                if (!empleadosListOld.contains(empleadosListNewEmpleados)) {
-                    RolEmpleados oldIdRolEmpleadosOfEmpleadosListNewEmpleados = empleadosListNewEmpleados.getIdRolEmpleados();
-                    empleadosListNewEmpleados.setIdRolEmpleados(rolEmpleados);
-                    empleadosListNewEmpleados = em.merge(empleadosListNewEmpleados);
-                    if (oldIdRolEmpleadosOfEmpleadosListNewEmpleados != null && !oldIdRolEmpleadosOfEmpleadosListNewEmpleados.equals(rolEmpleados)) {
-                        oldIdRolEmpleadosOfEmpleadosListNewEmpleados.getEmpleadosList().remove(empleadosListNewEmpleados);
-                        oldIdRolEmpleadosOfEmpleadosListNewEmpleados = em.merge(oldIdRolEmpleadosOfEmpleadosListNewEmpleados);
-                    }
-                }
+            if (idEmpleadosNew != null && !idEmpleadosNew.equals(idEmpleadosOld)) {
+                idEmpleadosNew.getRolEmpleadosCollection().add(rolEmpleados);
+                idEmpleadosNew = em.merge(idEmpleadosNew);
+            }
+            if (idRolOld != null && !idRolOld.equals(idRolNew)) {
+                idRolOld.getRolEmpleadosCollection().remove(rolEmpleados);
+                idRolOld = em.merge(idRolOld);
+            }
+            if (idRolNew != null && !idRolNew.equals(idRolOld)) {
+                idRolNew.getRolEmpleadosCollection().add(rolEmpleados);
+                idRolNew = em.merge(idRolNew);
             }
             em.getTransaction().commit();
         } catch (Exception ex) {
@@ -128,10 +130,15 @@ public class RolEmpleadosJpaController implements Serializable {
             } catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The rolEmpleados with id " + id + " no longer exists.", enfe);
             }
-            List<Empleados> empleadosList = rolEmpleados.getEmpleadosList();
-            for (Empleados empleadosListEmpleados : empleadosList) {
-                empleadosListEmpleados.setIdRolEmpleados(null);
-                empleadosListEmpleados = em.merge(empleadosListEmpleados);
+            Empleados idEmpleados = rolEmpleados.getIdEmpleados();
+            if (idEmpleados != null) {
+                idEmpleados.getRolEmpleadosCollection().remove(rolEmpleados);
+                idEmpleados = em.merge(idEmpleados);
+            }
+            Rol idRol = rolEmpleados.getIdRol();
+            if (idRol != null) {
+                idRol.getRolEmpleadosCollection().remove(rolEmpleados);
+                idRol = em.merge(idRol);
             }
             em.remove(rolEmpleados);
             em.getTransaction().commit();

@@ -5,6 +5,7 @@
  */
 package controladores;
 
+import controladores.exceptions.IllegalOrphanException;
 import controladores.exceptions.NonexistentEntityException;
 import entidades.Empleados;
 import java.io.Serializable;
@@ -12,12 +13,13 @@ import javax.persistence.Query;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
-import entidades.RolEmpleados;
 import entidades.Marcaciones;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
+import entidades.RolEmpleados;
 import entidades.Huellas;
 import entidades.JornadaEmpleado;
+import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
@@ -29,7 +31,7 @@ import javax.persistence.Persistence;
 public class EmpleadosJpaController implements Serializable {
 
     public EmpleadosJpaController() {
-    this.emf = Persistence.createEntityManagerFactory("ProyectoPU") ;
+        this.emf = Persistence.createEntityManagerFactory("Proyecto1PU");
     }
     private EntityManagerFactory emf = null;
 
@@ -38,72 +40,81 @@ public class EmpleadosJpaController implements Serializable {
     }
 
     public void create(Empleados empleados) {
-        if (empleados.getMarcacionesList() == null) {
-            empleados.setMarcacionesList(new ArrayList<Marcaciones>());
+        if (empleados.getMarcacionesCollection() == null) {
+            empleados.setMarcacionesCollection(new ArrayList<Marcaciones>());
         }
-        if (empleados.getHuellasList() == null) {
-            empleados.setHuellasList(new ArrayList<Huellas>());
+        if (empleados.getRolEmpleadosCollection() == null) {
+            empleados.setRolEmpleadosCollection(new ArrayList<RolEmpleados>());
         }
-        if (empleados.getJornadaEmpleadoList() == null) {
-            empleados.setJornadaEmpleadoList(new ArrayList<JornadaEmpleado>());
+        if (empleados.getHuellasCollection() == null) {
+            empleados.setHuellasCollection(new ArrayList<Huellas>());
+        }
+        if (empleados.getJornadaEmpleadoCollection() == null) {
+            empleados.setJornadaEmpleadoCollection(new ArrayList<JornadaEmpleado>());
         }
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            RolEmpleados idRolEmpleados = empleados.getIdRolEmpleados();
-            if (idRolEmpleados != null) {
-                idRolEmpleados = em.getReference(idRolEmpleados.getClass(), idRolEmpleados.getIdRolEmpleados());
-                empleados.setIdRolEmpleados(idRolEmpleados);
+            Collection<Marcaciones> attachedMarcacionesCollection = new ArrayList<Marcaciones>();
+            for (Marcaciones marcacionesCollectionMarcacionesToAttach : empleados.getMarcacionesCollection()) {
+                marcacionesCollectionMarcacionesToAttach = em.getReference(marcacionesCollectionMarcacionesToAttach.getClass(), marcacionesCollectionMarcacionesToAttach.getIdMarcaciones());
+                attachedMarcacionesCollection.add(marcacionesCollectionMarcacionesToAttach);
             }
-            List<Marcaciones> attachedMarcacionesList = new ArrayList<Marcaciones>();
-            for (Marcaciones marcacionesListMarcacionesToAttach : empleados.getMarcacionesList()) {
-                marcacionesListMarcacionesToAttach = em.getReference(marcacionesListMarcacionesToAttach.getClass(), marcacionesListMarcacionesToAttach.getIdMarcacion());
-                attachedMarcacionesList.add(marcacionesListMarcacionesToAttach);
+            empleados.setMarcacionesCollection(attachedMarcacionesCollection);
+            Collection<RolEmpleados> attachedRolEmpleadosCollection = new ArrayList<RolEmpleados>();
+            for (RolEmpleados rolEmpleadosCollectionRolEmpleadosToAttach : empleados.getRolEmpleadosCollection()) {
+                rolEmpleadosCollectionRolEmpleadosToAttach = em.getReference(rolEmpleadosCollectionRolEmpleadosToAttach.getClass(), rolEmpleadosCollectionRolEmpleadosToAttach.getIdRolEmpleados());
+                attachedRolEmpleadosCollection.add(rolEmpleadosCollectionRolEmpleadosToAttach);
             }
-            empleados.setMarcacionesList(attachedMarcacionesList);
-            List<Huellas> attachedHuellasList = new ArrayList<Huellas>();
-            for (Huellas huellasListHuellasToAttach : empleados.getHuellasList()) {
-                huellasListHuellasToAttach = em.getReference(huellasListHuellasToAttach.getClass(), huellasListHuellasToAttach.getIdHuella());
-                attachedHuellasList.add(huellasListHuellasToAttach);
+            empleados.setRolEmpleadosCollection(attachedRolEmpleadosCollection);
+            Collection<Huellas> attachedHuellasCollection = new ArrayList<Huellas>();
+            for (Huellas huellasCollectionHuellasToAttach : empleados.getHuellasCollection()) {
+                huellasCollectionHuellasToAttach = em.getReference(huellasCollectionHuellasToAttach.getClass(), huellasCollectionHuellasToAttach.getIdHuellas());
+                attachedHuellasCollection.add(huellasCollectionHuellasToAttach);
             }
-            empleados.setHuellasList(attachedHuellasList);
-            List<JornadaEmpleado> attachedJornadaEmpleadoList = new ArrayList<JornadaEmpleado>();
-            for (JornadaEmpleado jornadaEmpleadoListJornadaEmpleadoToAttach : empleados.getJornadaEmpleadoList()) {
-                jornadaEmpleadoListJornadaEmpleadoToAttach = em.getReference(jornadaEmpleadoListJornadaEmpleadoToAttach.getClass(), jornadaEmpleadoListJornadaEmpleadoToAttach.getIdJornadaEmpleado());
-                attachedJornadaEmpleadoList.add(jornadaEmpleadoListJornadaEmpleadoToAttach);
+            empleados.setHuellasCollection(attachedHuellasCollection);
+            Collection<JornadaEmpleado> attachedJornadaEmpleadoCollection = new ArrayList<JornadaEmpleado>();
+            for (JornadaEmpleado jornadaEmpleadoCollectionJornadaEmpleadoToAttach : empleados.getJornadaEmpleadoCollection()) {
+                jornadaEmpleadoCollectionJornadaEmpleadoToAttach = em.getReference(jornadaEmpleadoCollectionJornadaEmpleadoToAttach.getClass(), jornadaEmpleadoCollectionJornadaEmpleadoToAttach.getIdJornadaEmpleado());
+                attachedJornadaEmpleadoCollection.add(jornadaEmpleadoCollectionJornadaEmpleadoToAttach);
             }
-            empleados.setJornadaEmpleadoList(attachedJornadaEmpleadoList);
+            empleados.setJornadaEmpleadoCollection(attachedJornadaEmpleadoCollection);
             em.persist(empleados);
-            if (idRolEmpleados != null) {
-                idRolEmpleados.getEmpleadosList().add(empleados);
-                idRolEmpleados = em.merge(idRolEmpleados);
-            }
-            for (Marcaciones marcacionesListMarcaciones : empleados.getMarcacionesList()) {
-                Empleados oldIdEmpleadoOfMarcacionesListMarcaciones = marcacionesListMarcaciones.getIdEmpleado();
-                marcacionesListMarcaciones.setIdEmpleado(empleados);
-                marcacionesListMarcaciones = em.merge(marcacionesListMarcaciones);
-                if (oldIdEmpleadoOfMarcacionesListMarcaciones != null) {
-                    oldIdEmpleadoOfMarcacionesListMarcaciones.getMarcacionesList().remove(marcacionesListMarcaciones);
-                    oldIdEmpleadoOfMarcacionesListMarcaciones = em.merge(oldIdEmpleadoOfMarcacionesListMarcaciones);
+            for (Marcaciones marcacionesCollectionMarcaciones : empleados.getMarcacionesCollection()) {
+                Empleados oldIdEmpleadoOfMarcacionesCollectionMarcaciones = marcacionesCollectionMarcaciones.getIdEmpleado();
+                marcacionesCollectionMarcaciones.setIdEmpleado(empleados);
+                marcacionesCollectionMarcaciones = em.merge(marcacionesCollectionMarcaciones);
+                if (oldIdEmpleadoOfMarcacionesCollectionMarcaciones != null) {
+                    oldIdEmpleadoOfMarcacionesCollectionMarcaciones.getMarcacionesCollection().remove(marcacionesCollectionMarcaciones);
+                    oldIdEmpleadoOfMarcacionesCollectionMarcaciones = em.merge(oldIdEmpleadoOfMarcacionesCollectionMarcaciones);
                 }
             }
-            for (Huellas huellasListHuellas : empleados.getHuellasList()) {
-                Empleados oldIdEmpleadoOfHuellasListHuellas = huellasListHuellas.getIdEmpleado();
-                huellasListHuellas.setIdEmpleado(empleados);
-                huellasListHuellas = em.merge(huellasListHuellas);
-                if (oldIdEmpleadoOfHuellasListHuellas != null) {
-                    oldIdEmpleadoOfHuellasListHuellas.getHuellasList().remove(huellasListHuellas);
-                    oldIdEmpleadoOfHuellasListHuellas = em.merge(oldIdEmpleadoOfHuellasListHuellas);
+            for (RolEmpleados rolEmpleadosCollectionRolEmpleados : empleados.getRolEmpleadosCollection()) {
+                Empleados oldIdEmpleadosOfRolEmpleadosCollectionRolEmpleados = rolEmpleadosCollectionRolEmpleados.getIdEmpleados();
+                rolEmpleadosCollectionRolEmpleados.setIdEmpleados(empleados);
+                rolEmpleadosCollectionRolEmpleados = em.merge(rolEmpleadosCollectionRolEmpleados);
+                if (oldIdEmpleadosOfRolEmpleadosCollectionRolEmpleados != null) {
+                    oldIdEmpleadosOfRolEmpleadosCollectionRolEmpleados.getRolEmpleadosCollection().remove(rolEmpleadosCollectionRolEmpleados);
+                    oldIdEmpleadosOfRolEmpleadosCollectionRolEmpleados = em.merge(oldIdEmpleadosOfRolEmpleadosCollectionRolEmpleados);
                 }
             }
-            for (JornadaEmpleado jornadaEmpleadoListJornadaEmpleado : empleados.getJornadaEmpleadoList()) {
-                Empleados oldIdEmpleadoOfJornadaEmpleadoListJornadaEmpleado = jornadaEmpleadoListJornadaEmpleado.getIdEmpleado();
-                jornadaEmpleadoListJornadaEmpleado.setIdEmpleado(empleados);
-                jornadaEmpleadoListJornadaEmpleado = em.merge(jornadaEmpleadoListJornadaEmpleado);
-                if (oldIdEmpleadoOfJornadaEmpleadoListJornadaEmpleado != null) {
-                    oldIdEmpleadoOfJornadaEmpleadoListJornadaEmpleado.getJornadaEmpleadoList().remove(jornadaEmpleadoListJornadaEmpleado);
-                    oldIdEmpleadoOfJornadaEmpleadoListJornadaEmpleado = em.merge(oldIdEmpleadoOfJornadaEmpleadoListJornadaEmpleado);
+            for (Huellas huellasCollectionHuellas : empleados.getHuellasCollection()) {
+                Empleados oldIdEmpleadosOfHuellasCollectionHuellas = huellasCollectionHuellas.getIdEmpleados();
+                huellasCollectionHuellas.setIdEmpleados(empleados);
+                huellasCollectionHuellas = em.merge(huellasCollectionHuellas);
+                if (oldIdEmpleadosOfHuellasCollectionHuellas != null) {
+                    oldIdEmpleadosOfHuellasCollectionHuellas.getHuellasCollection().remove(huellasCollectionHuellas);
+                    oldIdEmpleadosOfHuellasCollectionHuellas = em.merge(oldIdEmpleadosOfHuellasCollectionHuellas);
+                }
+            }
+            for (JornadaEmpleado jornadaEmpleadoCollectionJornadaEmpleado : empleados.getJornadaEmpleadoCollection()) {
+                Empleados oldIdEmpleadosOfJornadaEmpleadoCollectionJornadaEmpleado = jornadaEmpleadoCollectionJornadaEmpleado.getIdEmpleados();
+                jornadaEmpleadoCollectionJornadaEmpleado.setIdEmpleados(empleados);
+                jornadaEmpleadoCollectionJornadaEmpleado = em.merge(jornadaEmpleadoCollectionJornadaEmpleado);
+                if (oldIdEmpleadosOfJornadaEmpleadoCollectionJornadaEmpleado != null) {
+                    oldIdEmpleadosOfJornadaEmpleadoCollectionJornadaEmpleado.getJornadaEmpleadoCollection().remove(jornadaEmpleadoCollectionJornadaEmpleado);
+                    oldIdEmpleadosOfJornadaEmpleadoCollectionJornadaEmpleado = em.merge(oldIdEmpleadosOfJornadaEmpleadoCollectionJornadaEmpleado);
                 }
             }
             em.getTransaction().commit();
@@ -114,102 +125,126 @@ public class EmpleadosJpaController implements Serializable {
         }
     }
 
-    public void edit(Empleados empleados) throws NonexistentEntityException, Exception {
+    public void edit(Empleados empleados) throws IllegalOrphanException, NonexistentEntityException, Exception {
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            Empleados persistentEmpleados = em.find(Empleados.class, empleados.getIdEmpleado());
-            RolEmpleados idRolEmpleadosOld = persistentEmpleados.getIdRolEmpleados();
-            RolEmpleados idRolEmpleadosNew = empleados.getIdRolEmpleados();
-            List<Marcaciones> marcacionesListOld = persistentEmpleados.getMarcacionesList();
-            List<Marcaciones> marcacionesListNew = empleados.getMarcacionesList();
-            List<Huellas> huellasListOld = persistentEmpleados.getHuellasList();
-            List<Huellas> huellasListNew = empleados.getHuellasList();
-            List<JornadaEmpleado> jornadaEmpleadoListOld = persistentEmpleados.getJornadaEmpleadoList();
-            List<JornadaEmpleado> jornadaEmpleadoListNew = empleados.getJornadaEmpleadoList();
-            if (idRolEmpleadosNew != null) {
-                idRolEmpleadosNew = em.getReference(idRolEmpleadosNew.getClass(), idRolEmpleadosNew.getIdRolEmpleados());
-                empleados.setIdRolEmpleados(idRolEmpleadosNew);
+            Empleados persistentEmpleados = em.find(Empleados.class, empleados.getIdEmpleados());
+            Collection<Marcaciones> marcacionesCollectionOld = persistentEmpleados.getMarcacionesCollection();
+            Collection<Marcaciones> marcacionesCollectionNew = empleados.getMarcacionesCollection();
+            Collection<RolEmpleados> rolEmpleadosCollectionOld = persistentEmpleados.getRolEmpleadosCollection();
+            Collection<RolEmpleados> rolEmpleadosCollectionNew = empleados.getRolEmpleadosCollection();
+            Collection<Huellas> huellasCollectionOld = persistentEmpleados.getHuellasCollection();
+            Collection<Huellas> huellasCollectionNew = empleados.getHuellasCollection();
+            Collection<JornadaEmpleado> jornadaEmpleadoCollectionOld = persistentEmpleados.getJornadaEmpleadoCollection();
+            Collection<JornadaEmpleado> jornadaEmpleadoCollectionNew = empleados.getJornadaEmpleadoCollection();
+            List<String> illegalOrphanMessages = null;
+            for (Marcaciones marcacionesCollectionOldMarcaciones : marcacionesCollectionOld) {
+                if (!marcacionesCollectionNew.contains(marcacionesCollectionOldMarcaciones)) {
+                    if (illegalOrphanMessages == null) {
+                        illegalOrphanMessages = new ArrayList<String>();
+                    }
+                    illegalOrphanMessages.add("You must retain Marcaciones " + marcacionesCollectionOldMarcaciones + " since its idEmpleado field is not nullable.");
+                }
             }
-            List<Marcaciones> attachedMarcacionesListNew = new ArrayList<Marcaciones>();
-            for (Marcaciones marcacionesListNewMarcacionesToAttach : marcacionesListNew) {
-                marcacionesListNewMarcacionesToAttach = em.getReference(marcacionesListNewMarcacionesToAttach.getClass(), marcacionesListNewMarcacionesToAttach.getIdMarcacion());
-                attachedMarcacionesListNew.add(marcacionesListNewMarcacionesToAttach);
+            for (RolEmpleados rolEmpleadosCollectionOldRolEmpleados : rolEmpleadosCollectionOld) {
+                if (!rolEmpleadosCollectionNew.contains(rolEmpleadosCollectionOldRolEmpleados)) {
+                    if (illegalOrphanMessages == null) {
+                        illegalOrphanMessages = new ArrayList<String>();
+                    }
+                    illegalOrphanMessages.add("You must retain RolEmpleados " + rolEmpleadosCollectionOldRolEmpleados + " since its idEmpleados field is not nullable.");
+                }
             }
-            marcacionesListNew = attachedMarcacionesListNew;
-            empleados.setMarcacionesList(marcacionesListNew);
-            List<Huellas> attachedHuellasListNew = new ArrayList<Huellas>();
-            for (Huellas huellasListNewHuellasToAttach : huellasListNew) {
-                huellasListNewHuellasToAttach = em.getReference(huellasListNewHuellasToAttach.getClass(), huellasListNewHuellasToAttach.getIdHuella());
-                attachedHuellasListNew.add(huellasListNewHuellasToAttach);
+            for (Huellas huellasCollectionOldHuellas : huellasCollectionOld) {
+                if (!huellasCollectionNew.contains(huellasCollectionOldHuellas)) {
+                    if (illegalOrphanMessages == null) {
+                        illegalOrphanMessages = new ArrayList<String>();
+                    }
+                    illegalOrphanMessages.add("You must retain Huellas " + huellasCollectionOldHuellas + " since its idEmpleados field is not nullable.");
+                }
             }
-            huellasListNew = attachedHuellasListNew;
-            empleados.setHuellasList(huellasListNew);
-            List<JornadaEmpleado> attachedJornadaEmpleadoListNew = new ArrayList<JornadaEmpleado>();
-            for (JornadaEmpleado jornadaEmpleadoListNewJornadaEmpleadoToAttach : jornadaEmpleadoListNew) {
-                jornadaEmpleadoListNewJornadaEmpleadoToAttach = em.getReference(jornadaEmpleadoListNewJornadaEmpleadoToAttach.getClass(), jornadaEmpleadoListNewJornadaEmpleadoToAttach.getIdJornadaEmpleado());
-                attachedJornadaEmpleadoListNew.add(jornadaEmpleadoListNewJornadaEmpleadoToAttach);
+            for (JornadaEmpleado jornadaEmpleadoCollectionOldJornadaEmpleado : jornadaEmpleadoCollectionOld) {
+                if (!jornadaEmpleadoCollectionNew.contains(jornadaEmpleadoCollectionOldJornadaEmpleado)) {
+                    if (illegalOrphanMessages == null) {
+                        illegalOrphanMessages = new ArrayList<String>();
+                    }
+                    illegalOrphanMessages.add("You must retain JornadaEmpleado " + jornadaEmpleadoCollectionOldJornadaEmpleado + " since its idEmpleados field is not nullable.");
+                }
             }
-            jornadaEmpleadoListNew = attachedJornadaEmpleadoListNew;
-            empleados.setJornadaEmpleadoList(jornadaEmpleadoListNew);
+            if (illegalOrphanMessages != null) {
+                throw new IllegalOrphanException(illegalOrphanMessages);
+            }
+            Collection<Marcaciones> attachedMarcacionesCollectionNew = new ArrayList<Marcaciones>();
+            for (Marcaciones marcacionesCollectionNewMarcacionesToAttach : marcacionesCollectionNew) {
+                marcacionesCollectionNewMarcacionesToAttach = em.getReference(marcacionesCollectionNewMarcacionesToAttach.getClass(), marcacionesCollectionNewMarcacionesToAttach.getIdMarcaciones());
+                attachedMarcacionesCollectionNew.add(marcacionesCollectionNewMarcacionesToAttach);
+            }
+            marcacionesCollectionNew = attachedMarcacionesCollectionNew;
+            empleados.setMarcacionesCollection(marcacionesCollectionNew);
+            Collection<RolEmpleados> attachedRolEmpleadosCollectionNew = new ArrayList<RolEmpleados>();
+            for (RolEmpleados rolEmpleadosCollectionNewRolEmpleadosToAttach : rolEmpleadosCollectionNew) {
+                rolEmpleadosCollectionNewRolEmpleadosToAttach = em.getReference(rolEmpleadosCollectionNewRolEmpleadosToAttach.getClass(), rolEmpleadosCollectionNewRolEmpleadosToAttach.getIdRolEmpleados());
+                attachedRolEmpleadosCollectionNew.add(rolEmpleadosCollectionNewRolEmpleadosToAttach);
+            }
+            rolEmpleadosCollectionNew = attachedRolEmpleadosCollectionNew;
+            empleados.setRolEmpleadosCollection(rolEmpleadosCollectionNew);
+            Collection<Huellas> attachedHuellasCollectionNew = new ArrayList<Huellas>();
+            for (Huellas huellasCollectionNewHuellasToAttach : huellasCollectionNew) {
+                huellasCollectionNewHuellasToAttach = em.getReference(huellasCollectionNewHuellasToAttach.getClass(), huellasCollectionNewHuellasToAttach.getIdHuellas());
+                attachedHuellasCollectionNew.add(huellasCollectionNewHuellasToAttach);
+            }
+            huellasCollectionNew = attachedHuellasCollectionNew;
+            empleados.setHuellasCollection(huellasCollectionNew);
+            Collection<JornadaEmpleado> attachedJornadaEmpleadoCollectionNew = new ArrayList<JornadaEmpleado>();
+            for (JornadaEmpleado jornadaEmpleadoCollectionNewJornadaEmpleadoToAttach : jornadaEmpleadoCollectionNew) {
+                jornadaEmpleadoCollectionNewJornadaEmpleadoToAttach = em.getReference(jornadaEmpleadoCollectionNewJornadaEmpleadoToAttach.getClass(), jornadaEmpleadoCollectionNewJornadaEmpleadoToAttach.getIdJornadaEmpleado());
+                attachedJornadaEmpleadoCollectionNew.add(jornadaEmpleadoCollectionNewJornadaEmpleadoToAttach);
+            }
+            jornadaEmpleadoCollectionNew = attachedJornadaEmpleadoCollectionNew;
+            empleados.setJornadaEmpleadoCollection(jornadaEmpleadoCollectionNew);
             empleados = em.merge(empleados);
-            if (idRolEmpleadosOld != null && !idRolEmpleadosOld.equals(idRolEmpleadosNew)) {
-                idRolEmpleadosOld.getEmpleadosList().remove(empleados);
-                idRolEmpleadosOld = em.merge(idRolEmpleadosOld);
-            }
-            if (idRolEmpleadosNew != null && !idRolEmpleadosNew.equals(idRolEmpleadosOld)) {
-                idRolEmpleadosNew.getEmpleadosList().add(empleados);
-                idRolEmpleadosNew = em.merge(idRolEmpleadosNew);
-            }
-            for (Marcaciones marcacionesListOldMarcaciones : marcacionesListOld) {
-                if (!marcacionesListNew.contains(marcacionesListOldMarcaciones)) {
-                    marcacionesListOldMarcaciones.setIdEmpleado(null);
-                    marcacionesListOldMarcaciones = em.merge(marcacionesListOldMarcaciones);
-                }
-            }
-            for (Marcaciones marcacionesListNewMarcaciones : marcacionesListNew) {
-                if (!marcacionesListOld.contains(marcacionesListNewMarcaciones)) {
-                    Empleados oldIdEmpleadoOfMarcacionesListNewMarcaciones = marcacionesListNewMarcaciones.getIdEmpleado();
-                    marcacionesListNewMarcaciones.setIdEmpleado(empleados);
-                    marcacionesListNewMarcaciones = em.merge(marcacionesListNewMarcaciones);
-                    if (oldIdEmpleadoOfMarcacionesListNewMarcaciones != null && !oldIdEmpleadoOfMarcacionesListNewMarcaciones.equals(empleados)) {
-                        oldIdEmpleadoOfMarcacionesListNewMarcaciones.getMarcacionesList().remove(marcacionesListNewMarcaciones);
-                        oldIdEmpleadoOfMarcacionesListNewMarcaciones = em.merge(oldIdEmpleadoOfMarcacionesListNewMarcaciones);
+            for (Marcaciones marcacionesCollectionNewMarcaciones : marcacionesCollectionNew) {
+                if (!marcacionesCollectionOld.contains(marcacionesCollectionNewMarcaciones)) {
+                    Empleados oldIdEmpleadoOfMarcacionesCollectionNewMarcaciones = marcacionesCollectionNewMarcaciones.getIdEmpleado();
+                    marcacionesCollectionNewMarcaciones.setIdEmpleado(empleados);
+                    marcacionesCollectionNewMarcaciones = em.merge(marcacionesCollectionNewMarcaciones);
+                    if (oldIdEmpleadoOfMarcacionesCollectionNewMarcaciones != null && !oldIdEmpleadoOfMarcacionesCollectionNewMarcaciones.equals(empleados)) {
+                        oldIdEmpleadoOfMarcacionesCollectionNewMarcaciones.getMarcacionesCollection().remove(marcacionesCollectionNewMarcaciones);
+                        oldIdEmpleadoOfMarcacionesCollectionNewMarcaciones = em.merge(oldIdEmpleadoOfMarcacionesCollectionNewMarcaciones);
                     }
                 }
             }
-            for (Huellas huellasListOldHuellas : huellasListOld) {
-                if (!huellasListNew.contains(huellasListOldHuellas)) {
-                    huellasListOldHuellas.setIdEmpleado(null);
-                    huellasListOldHuellas = em.merge(huellasListOldHuellas);
-                }
-            }
-            for (Huellas huellasListNewHuellas : huellasListNew) {
-                if (!huellasListOld.contains(huellasListNewHuellas)) {
-                    Empleados oldIdEmpleadoOfHuellasListNewHuellas = huellasListNewHuellas.getIdEmpleado();
-                    huellasListNewHuellas.setIdEmpleado(empleados);
-                    huellasListNewHuellas = em.merge(huellasListNewHuellas);
-                    if (oldIdEmpleadoOfHuellasListNewHuellas != null && !oldIdEmpleadoOfHuellasListNewHuellas.equals(empleados)) {
-                        oldIdEmpleadoOfHuellasListNewHuellas.getHuellasList().remove(huellasListNewHuellas);
-                        oldIdEmpleadoOfHuellasListNewHuellas = em.merge(oldIdEmpleadoOfHuellasListNewHuellas);
+            for (RolEmpleados rolEmpleadosCollectionNewRolEmpleados : rolEmpleadosCollectionNew) {
+                if (!rolEmpleadosCollectionOld.contains(rolEmpleadosCollectionNewRolEmpleados)) {
+                    Empleados oldIdEmpleadosOfRolEmpleadosCollectionNewRolEmpleados = rolEmpleadosCollectionNewRolEmpleados.getIdEmpleados();
+                    rolEmpleadosCollectionNewRolEmpleados.setIdEmpleados(empleados);
+                    rolEmpleadosCollectionNewRolEmpleados = em.merge(rolEmpleadosCollectionNewRolEmpleados);
+                    if (oldIdEmpleadosOfRolEmpleadosCollectionNewRolEmpleados != null && !oldIdEmpleadosOfRolEmpleadosCollectionNewRolEmpleados.equals(empleados)) {
+                        oldIdEmpleadosOfRolEmpleadosCollectionNewRolEmpleados.getRolEmpleadosCollection().remove(rolEmpleadosCollectionNewRolEmpleados);
+                        oldIdEmpleadosOfRolEmpleadosCollectionNewRolEmpleados = em.merge(oldIdEmpleadosOfRolEmpleadosCollectionNewRolEmpleados);
                     }
                 }
             }
-            for (JornadaEmpleado jornadaEmpleadoListOldJornadaEmpleado : jornadaEmpleadoListOld) {
-                if (!jornadaEmpleadoListNew.contains(jornadaEmpleadoListOldJornadaEmpleado)) {
-                    jornadaEmpleadoListOldJornadaEmpleado.setIdEmpleado(null);
-                    jornadaEmpleadoListOldJornadaEmpleado = em.merge(jornadaEmpleadoListOldJornadaEmpleado);
+            for (Huellas huellasCollectionNewHuellas : huellasCollectionNew) {
+                if (!huellasCollectionOld.contains(huellasCollectionNewHuellas)) {
+                    Empleados oldIdEmpleadosOfHuellasCollectionNewHuellas = huellasCollectionNewHuellas.getIdEmpleados();
+                    huellasCollectionNewHuellas.setIdEmpleados(empleados);
+                    huellasCollectionNewHuellas = em.merge(huellasCollectionNewHuellas);
+                    if (oldIdEmpleadosOfHuellasCollectionNewHuellas != null && !oldIdEmpleadosOfHuellasCollectionNewHuellas.equals(empleados)) {
+                        oldIdEmpleadosOfHuellasCollectionNewHuellas.getHuellasCollection().remove(huellasCollectionNewHuellas);
+                        oldIdEmpleadosOfHuellasCollectionNewHuellas = em.merge(oldIdEmpleadosOfHuellasCollectionNewHuellas);
+                    }
                 }
             }
-            for (JornadaEmpleado jornadaEmpleadoListNewJornadaEmpleado : jornadaEmpleadoListNew) {
-                if (!jornadaEmpleadoListOld.contains(jornadaEmpleadoListNewJornadaEmpleado)) {
-                    Empleados oldIdEmpleadoOfJornadaEmpleadoListNewJornadaEmpleado = jornadaEmpleadoListNewJornadaEmpleado.getIdEmpleado();
-                    jornadaEmpleadoListNewJornadaEmpleado.setIdEmpleado(empleados);
-                    jornadaEmpleadoListNewJornadaEmpleado = em.merge(jornadaEmpleadoListNewJornadaEmpleado);
-                    if (oldIdEmpleadoOfJornadaEmpleadoListNewJornadaEmpleado != null && !oldIdEmpleadoOfJornadaEmpleadoListNewJornadaEmpleado.equals(empleados)) {
-                        oldIdEmpleadoOfJornadaEmpleadoListNewJornadaEmpleado.getJornadaEmpleadoList().remove(jornadaEmpleadoListNewJornadaEmpleado);
-                        oldIdEmpleadoOfJornadaEmpleadoListNewJornadaEmpleado = em.merge(oldIdEmpleadoOfJornadaEmpleadoListNewJornadaEmpleado);
+            for (JornadaEmpleado jornadaEmpleadoCollectionNewJornadaEmpleado : jornadaEmpleadoCollectionNew) {
+                if (!jornadaEmpleadoCollectionOld.contains(jornadaEmpleadoCollectionNewJornadaEmpleado)) {
+                    Empleados oldIdEmpleadosOfJornadaEmpleadoCollectionNewJornadaEmpleado = jornadaEmpleadoCollectionNewJornadaEmpleado.getIdEmpleados();
+                    jornadaEmpleadoCollectionNewJornadaEmpleado.setIdEmpleados(empleados);
+                    jornadaEmpleadoCollectionNewJornadaEmpleado = em.merge(jornadaEmpleadoCollectionNewJornadaEmpleado);
+                    if (oldIdEmpleadosOfJornadaEmpleadoCollectionNewJornadaEmpleado != null && !oldIdEmpleadosOfJornadaEmpleadoCollectionNewJornadaEmpleado.equals(empleados)) {
+                        oldIdEmpleadosOfJornadaEmpleadoCollectionNewJornadaEmpleado.getJornadaEmpleadoCollection().remove(jornadaEmpleadoCollectionNewJornadaEmpleado);
+                        oldIdEmpleadosOfJornadaEmpleadoCollectionNewJornadaEmpleado = em.merge(oldIdEmpleadosOfJornadaEmpleadoCollectionNewJornadaEmpleado);
                     }
                 }
             }
@@ -217,7 +252,7 @@ public class EmpleadosJpaController implements Serializable {
         } catch (Exception ex) {
             String msg = ex.getLocalizedMessage();
             if (msg == null || msg.length() == 0) {
-                Integer id = empleados.getIdEmpleado();
+                Integer id = empleados.getIdEmpleados();
                 if (findEmpleados(id) == null) {
                     throw new NonexistentEntityException("The empleados with id " + id + " no longer exists.");
                 }
@@ -230,7 +265,7 @@ public class EmpleadosJpaController implements Serializable {
         }
     }
 
-    public void destroy(Integer id) throws NonexistentEntityException {
+    public void destroy(Integer id) throws IllegalOrphanException, NonexistentEntityException {
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -238,29 +273,41 @@ public class EmpleadosJpaController implements Serializable {
             Empleados empleados;
             try {
                 empleados = em.getReference(Empleados.class, id);
-                empleados.getIdEmpleado();
+                empleados.getIdEmpleados();
             } catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The empleados with id " + id + " no longer exists.", enfe);
             }
-            RolEmpleados idRolEmpleados = empleados.getIdRolEmpleados();
-            if (idRolEmpleados != null) {
-                idRolEmpleados.getEmpleadosList().remove(empleados);
-                idRolEmpleados = em.merge(idRolEmpleados);
+            List<String> illegalOrphanMessages = null;
+            Collection<Marcaciones> marcacionesCollectionOrphanCheck = empleados.getMarcacionesCollection();
+            for (Marcaciones marcacionesCollectionOrphanCheckMarcaciones : marcacionesCollectionOrphanCheck) {
+                if (illegalOrphanMessages == null) {
+                    illegalOrphanMessages = new ArrayList<String>();
+                }
+                illegalOrphanMessages.add("This Empleados (" + empleados + ") cannot be destroyed since the Marcaciones " + marcacionesCollectionOrphanCheckMarcaciones + " in its marcacionesCollection field has a non-nullable idEmpleado field.");
             }
-            List<Marcaciones> marcacionesList = empleados.getMarcacionesList();
-            for (Marcaciones marcacionesListMarcaciones : marcacionesList) {
-                marcacionesListMarcaciones.setIdEmpleado(null);
-                marcacionesListMarcaciones = em.merge(marcacionesListMarcaciones);
+            Collection<RolEmpleados> rolEmpleadosCollectionOrphanCheck = empleados.getRolEmpleadosCollection();
+            for (RolEmpleados rolEmpleadosCollectionOrphanCheckRolEmpleados : rolEmpleadosCollectionOrphanCheck) {
+                if (illegalOrphanMessages == null) {
+                    illegalOrphanMessages = new ArrayList<String>();
+                }
+                illegalOrphanMessages.add("This Empleados (" + empleados + ") cannot be destroyed since the RolEmpleados " + rolEmpleadosCollectionOrphanCheckRolEmpleados + " in its rolEmpleadosCollection field has a non-nullable idEmpleados field.");
             }
-            List<Huellas> huellasList = empleados.getHuellasList();
-            for (Huellas huellasListHuellas : huellasList) {
-                huellasListHuellas.setIdEmpleado(null);
-                huellasListHuellas = em.merge(huellasListHuellas);
+            Collection<Huellas> huellasCollectionOrphanCheck = empleados.getHuellasCollection();
+            for (Huellas huellasCollectionOrphanCheckHuellas : huellasCollectionOrphanCheck) {
+                if (illegalOrphanMessages == null) {
+                    illegalOrphanMessages = new ArrayList<String>();
+                }
+                illegalOrphanMessages.add("This Empleados (" + empleados + ") cannot be destroyed since the Huellas " + huellasCollectionOrphanCheckHuellas + " in its huellasCollection field has a non-nullable idEmpleados field.");
             }
-            List<JornadaEmpleado> jornadaEmpleadoList = empleados.getJornadaEmpleadoList();
-            for (JornadaEmpleado jornadaEmpleadoListJornadaEmpleado : jornadaEmpleadoList) {
-                jornadaEmpleadoListJornadaEmpleado.setIdEmpleado(null);
-                jornadaEmpleadoListJornadaEmpleado = em.merge(jornadaEmpleadoListJornadaEmpleado);
+            Collection<JornadaEmpleado> jornadaEmpleadoCollectionOrphanCheck = empleados.getJornadaEmpleadoCollection();
+            for (JornadaEmpleado jornadaEmpleadoCollectionOrphanCheckJornadaEmpleado : jornadaEmpleadoCollectionOrphanCheck) {
+                if (illegalOrphanMessages == null) {
+                    illegalOrphanMessages = new ArrayList<String>();
+                }
+                illegalOrphanMessages.add("This Empleados (" + empleados + ") cannot be destroyed since the JornadaEmpleado " + jornadaEmpleadoCollectionOrphanCheckJornadaEmpleado + " in its jornadaEmpleadoCollection field has a non-nullable idEmpleados field.");
+            }
+            if (illegalOrphanMessages != null) {
+                throw new IllegalOrphanException(illegalOrphanMessages);
             }
             em.remove(empleados);
             em.getTransaction().commit();

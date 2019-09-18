@@ -6,16 +6,16 @@
 package entidades;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Date;
-import java.util.List;
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.Lob;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
@@ -34,80 +34,109 @@ import javax.xml.bind.annotation.XmlTransient;
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "Empleados.findAll", query = "SELECT e FROM Empleados e")
-    , @NamedQuery(name = "Empleados.findByIdEmpleado", query = "SELECT e FROM Empleados e WHERE e.idEmpleado = :idEmpleado")
-    , @NamedQuery(name = "Empleados.findByCedula", query = "SELECT e FROM Empleados e WHERE e.cedula = :cedula")
-    , @NamedQuery(name = "Empleados.findByNombres", query = "SELECT e FROM Empleados e WHERE e.nombres = :nombres")
-    , @NamedQuery(name = "Empleados.findByApellidos", query = "SELECT e FROM Empleados e WHERE e.apellidos = :apellidos")
-    , @NamedQuery(name = "Empleados.findByUsuario", query = "SELECT e FROM Empleados e WHERE e.usuario = :usuario")
-    , @NamedQuery(name = "Empleados.findByPassword", query = "SELECT e FROM Empleados e WHERE e.password = :password")
-    , @NamedQuery(name = "Empleados.findByFechaDeNacimiento", query = "SELECT e FROM Empleados e WHERE e.fechaDeNacimiento = :fechaDeNacimiento")
-    , @NamedQuery(name = "Empleados.findByDireccion", query = "SELECT e FROM Empleados e WHERE e.direccion = :direccion")
-    , @NamedQuery(name = "Empleados.findByTelefono", query = "SELECT e FROM Empleados e WHERE e.telefono = :telefono")
+    , @NamedQuery(name = "Empleados.findByIdEmpleados", query = "SELECT e FROM Empleados e WHERE e.idEmpleados = :idEmpleados")
+    , @NamedQuery(name = "Empleados.findByFechaNacimiento", query = "SELECT e FROM Empleados e WHERE e.fechaNacimiento = :fechaNacimiento")
     , @NamedQuery(name = "Empleados.findByFechaActivacion", query = "SELECT e FROM Empleados e WHERE e.fechaActivacion = :fechaActivacion")
-    , @NamedQuery(name = "Empleados.findByFechaInactivacion", query = "SELECT e FROM Empleados e WHERE e.fechaInactivacion = :fechaInactivacion")
-    , @NamedQuery(name = "Empleados.findByEstado", query = "SELECT e FROM Empleados e WHERE e.estado = :estado")
-    , @NamedQuery(name = "Empleados.findByObservacion", query = "SELECT e FROM Empleados e WHERE e.observacion = :observacion")
-    , @NamedQuery(name = "Empleados.findByImagen", query = "SELECT e FROM Empleados e WHERE e.imagen = :imagen")})
+    , @NamedQuery(name = "Empleados.findByFechaInactivacion", query = "SELECT e FROM Empleados e WHERE e.fechaInactivacion = :fechaInactivacion")})
 public class Empleados implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
-    @Column(name = "id_empleado")
-    private Integer idEmpleado;
+    @Column(name = "id_empleados")
+    private Integer idEmpleados;
+    @Basic(optional = false)
+    @Lob
     @Column(name = "cedula")
     private String cedula;
-    @Column(name = "nombres")
-    private String nombres;
-    @Column(name = "apellidos")
-    private String apellidos;
+    @Basic(optional = false)
+    @Lob
+    @Column(name = "nombre")
+    private String nombre;
+    @Basic(optional = false)
+    @Lob
+    @Column(name = "apellido")
+    private String apellido;
+    @Basic(optional = false)
+    @Lob
     @Column(name = "usuario")
     private String usuario;
+    @Basic(optional = false)
+    @Lob
     @Column(name = "password")
     private String password;
-    @Column(name = "fecha_de_nacimiento")
+    @Basic(optional = false)
+    @Column(name = "fecha_nacimiento")
     @Temporal(TemporalType.DATE)
-    private Date fechaDeNacimiento;
+    private Date fechaNacimiento;
+    @Basic(optional = false)
+    @Lob
     @Column(name = "direccion")
     private String direccion;
+    @Basic(optional = false)
+    @Lob
     @Column(name = "telefono")
     private String telefono;
+    @Basic(optional = false)
     @Column(name = "fecha_activacion")
     @Temporal(TemporalType.TIMESTAMP)
     private Date fechaActivacion;
+    @Basic(optional = false)
     @Column(name = "fecha_inactivacion")
     @Temporal(TemporalType.TIMESTAMP)
     private Date fechaInactivacion;
+    @Basic(optional = false)
+    @Lob
     @Column(name = "estado")
     private String estado;
+    @Basic(optional = false)
+    @Lob
     @Column(name = "observacion")
     private String observacion;
+    @Basic(optional = false)
+    @Lob
     @Column(name = "imagen")
     private String imagen;
-    @OneToMany(mappedBy = "idEmpleado")
-    private List<Marcaciones> marcacionesList;
-    @JoinColumn(name = "id_rol_empleados", referencedColumnName = "id_rol_empleados")
-    @ManyToOne
-    private RolEmpleados idRolEmpleados;
-    @OneToMany(mappedBy = "idEmpleado")
-    private List<Huellas> huellasList;
-    @OneToMany(mappedBy = "idEmpleado")
-    private List<JornadaEmpleado> jornadaEmpleadoList;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "idEmpleado")
+    private Collection<Marcaciones> marcacionesCollection;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "idEmpleados")
+    private Collection<RolEmpleados> rolEmpleadosCollection;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "idEmpleados")
+    private Collection<Huellas> huellasCollection;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "idEmpleados")
+    private Collection<JornadaEmpleado> jornadaEmpleadoCollection;
 
     public Empleados() {
     }
 
-    public Empleados(Integer idEmpleado) {
-        this.idEmpleado = idEmpleado;
+    public Empleados(Integer idEmpleados) {
+        this.idEmpleados = idEmpleados;
     }
 
-    public Integer getIdEmpleado() {
-        return idEmpleado;
+    public Empleados(Integer idEmpleados, String cedula, String nombre, String apellido, String usuario, String password, Date fechaNacimiento, String direccion, String telefono, Date fechaActivacion, Date fechaInactivacion, String estado, String observacion, String imagen) {
+        this.idEmpleados = idEmpleados;
+        this.cedula = cedula;
+        this.nombre = nombre;
+        this.apellido = apellido;
+        this.usuario = usuario;
+        this.password = password;
+        this.fechaNacimiento = fechaNacimiento;
+        this.direccion = direccion;
+        this.telefono = telefono;
+        this.fechaActivacion = fechaActivacion;
+        this.fechaInactivacion = fechaInactivacion;
+        this.estado = estado;
+        this.observacion = observacion;
+        this.imagen = imagen;
     }
 
-    public void setIdEmpleado(Integer idEmpleado) {
-        this.idEmpleado = idEmpleado;
+    public Integer getIdEmpleados() {
+        return idEmpleados;
+    }
+
+    public void setIdEmpleados(Integer idEmpleados) {
+        this.idEmpleados = idEmpleados;
     }
 
     public String getCedula() {
@@ -118,20 +147,20 @@ public class Empleados implements Serializable {
         this.cedula = cedula;
     }
 
-    public String getNombres() {
-        return nombres;
+    public String getNombre() {
+        return nombre;
     }
 
-    public void setNombres(String nombres) {
-        this.nombres = nombres;
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
     }
 
-    public String getApellidos() {
-        return apellidos;
+    public String getApellido() {
+        return apellido;
     }
 
-    public void setApellidos(String apellidos) {
-        this.apellidos = apellidos;
+    public void setApellido(String apellido) {
+        this.apellido = apellido;
     }
 
     public String getUsuario() {
@@ -150,12 +179,12 @@ public class Empleados implements Serializable {
         this.password = password;
     }
 
-    public Date getFechaDeNacimiento() {
-        return fechaDeNacimiento;
+    public Date getFechaNacimiento() {
+        return fechaNacimiento;
     }
 
-    public void setFechaDeNacimiento(Date fechaDeNacimiento) {
-        this.fechaDeNacimiento = fechaDeNacimiento;
+    public void setFechaNacimiento(Date fechaNacimiento) {
+        this.fechaNacimiento = fechaNacimiento;
     }
 
     public String getDireccion() {
@@ -215,44 +244,45 @@ public class Empleados implements Serializable {
     }
 
     @XmlTransient
-    public List<Marcaciones> getMarcacionesList() {
-        return marcacionesList;
+    public Collection<Marcaciones> getMarcacionesCollection() {
+        return marcacionesCollection;
     }
 
-    public void setMarcacionesList(List<Marcaciones> marcacionesList) {
-        this.marcacionesList = marcacionesList;
-    }
-
-    public RolEmpleados getIdRolEmpleados() {
-        return idRolEmpleados;
-    }
-
-    public void setIdRolEmpleados(RolEmpleados idRolEmpleados) {
-        this.idRolEmpleados = idRolEmpleados;
+    public void setMarcacionesCollection(Collection<Marcaciones> marcacionesCollection) {
+        this.marcacionesCollection = marcacionesCollection;
     }
 
     @XmlTransient
-    public List<Huellas> getHuellasList() {
-        return huellasList;
+    public Collection<RolEmpleados> getRolEmpleadosCollection() {
+        return rolEmpleadosCollection;
     }
 
-    public void setHuellasList(List<Huellas> huellasList) {
-        this.huellasList = huellasList;
+    public void setRolEmpleadosCollection(Collection<RolEmpleados> rolEmpleadosCollection) {
+        this.rolEmpleadosCollection = rolEmpleadosCollection;
     }
 
     @XmlTransient
-    public List<JornadaEmpleado> getJornadaEmpleadoList() {
-        return jornadaEmpleadoList;
+    public Collection<Huellas> getHuellasCollection() {
+        return huellasCollection;
     }
 
-    public void setJornadaEmpleadoList(List<JornadaEmpleado> jornadaEmpleadoList) {
-        this.jornadaEmpleadoList = jornadaEmpleadoList;
+    public void setHuellasCollection(Collection<Huellas> huellasCollection) {
+        this.huellasCollection = huellasCollection;
+    }
+
+    @XmlTransient
+    public Collection<JornadaEmpleado> getJornadaEmpleadoCollection() {
+        return jornadaEmpleadoCollection;
+    }
+
+    public void setJornadaEmpleadoCollection(Collection<JornadaEmpleado> jornadaEmpleadoCollection) {
+        this.jornadaEmpleadoCollection = jornadaEmpleadoCollection;
     }
 
     @Override
     public int hashCode() {
         int hash = 0;
-        hash += (idEmpleado != null ? idEmpleado.hashCode() : 0);
+        hash += (idEmpleados != null ? idEmpleados.hashCode() : 0);
         return hash;
     }
 
@@ -263,7 +293,7 @@ public class Empleados implements Serializable {
             return false;
         }
         Empleados other = (Empleados) object;
-        if ((this.idEmpleado == null && other.idEmpleado != null) || (this.idEmpleado != null && !this.idEmpleado.equals(other.idEmpleado))) {
+        if ((this.idEmpleados == null && other.idEmpleados != null) || (this.idEmpleados != null && !this.idEmpleados.equals(other.idEmpleados))) {
             return false;
         }
         return true;
@@ -271,7 +301,7 @@ public class Empleados implements Serializable {
 
     @Override
     public String toString() {
-        return "entidades.Empleados[ idEmpleado=" + idEmpleado + " ]";
+        return "entidades.Empleados[ idEmpleados=" + idEmpleados + " ]";
     }
     
 }

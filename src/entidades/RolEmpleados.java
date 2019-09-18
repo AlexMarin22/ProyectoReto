@@ -6,22 +6,18 @@
 package entidades;
 
 import java.io.Serializable;
-import java.util.Date;
-import java.util.List;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
 
 /**
  *
@@ -32,11 +28,7 @@ import javax.xml.bind.annotation.XmlTransient;
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "RolEmpleados.findAll", query = "SELECT r FROM RolEmpleados r")
-    , @NamedQuery(name = "RolEmpleados.findByIdRolEmpleados", query = "SELECT r FROM RolEmpleados r WHERE r.idRolEmpleados = :idRolEmpleados")
-    , @NamedQuery(name = "RolEmpleados.findByObservacion", query = "SELECT r FROM RolEmpleados r WHERE r.observacion = :observacion")
-    , @NamedQuery(name = "RolEmpleados.findByFechaActivacion", query = "SELECT r FROM RolEmpleados r WHERE r.fechaActivacion = :fechaActivacion")
-    , @NamedQuery(name = "RolEmpleados.findByFechaInactivacion", query = "SELECT r FROM RolEmpleados r WHERE r.fechaInactivacion = :fechaInactivacion")
-    , @NamedQuery(name = "RolEmpleados.findByEstado", query = "SELECT r FROM RolEmpleados r WHERE r.estado = :estado")})
+    , @NamedQuery(name = "RolEmpleados.findByIdRolEmpleados", query = "SELECT r FROM RolEmpleados r WHERE r.idRolEmpleados = :idRolEmpleados")})
 public class RolEmpleados implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -45,18 +37,12 @@ public class RolEmpleados implements Serializable {
     @Basic(optional = false)
     @Column(name = "id_rol_empleados")
     private Integer idRolEmpleados;
-    @Column(name = "observacion")
-    private String observacion;
-    @Column(name = "fecha_activacion")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date fechaActivacion;
-    @Column(name = "fecha_inactivacion")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date fechaInactivacion;
-    @Column(name = "estado")
-    private String estado;
-    @OneToMany(mappedBy = "idRolEmpleados")
-    private List<Empleados> empleadosList;
+    @JoinColumn(name = "id_empleados", referencedColumnName = "id_empleados")
+    @ManyToOne(optional = false)
+    private Empleados idEmpleados;
+    @JoinColumn(name = "id_rol", referencedColumnName = "id_rol")
+    @ManyToOne(optional = false)
+    private Rol idRol;
 
     public RolEmpleados() {
     }
@@ -73,45 +59,20 @@ public class RolEmpleados implements Serializable {
         this.idRolEmpleados = idRolEmpleados;
     }
 
-    public String getObservacion() {
-        return observacion;
+    public Empleados getIdEmpleados() {
+        return idEmpleados;
     }
 
-    public void setObservacion(String observacion) {
-        this.observacion = observacion;
+    public void setIdEmpleados(Empleados idEmpleados) {
+        this.idEmpleados = idEmpleados;
     }
 
-    public Date getFechaActivacion() {
-        return fechaActivacion;
+    public Rol getIdRol() {
+        return idRol;
     }
 
-    public void setFechaActivacion(Date fechaActivacion) {
-        this.fechaActivacion = fechaActivacion;
-    }
-
-    public Date getFechaInactivacion() {
-        return fechaInactivacion;
-    }
-
-    public void setFechaInactivacion(Date fechaInactivacion) {
-        this.fechaInactivacion = fechaInactivacion;
-    }
-
-    public String getEstado() {
-        return estado;
-    }
-
-    public void setEstado(String estado) {
-        this.estado = estado;
-    }
-
-    @XmlTransient
-    public List<Empleados> getEmpleadosList() {
-        return empleadosList;
-    }
-
-    public void setEmpleadosList(List<Empleados> empleadosList) {
-        this.empleadosList = empleadosList;
+    public void setIdRol(Rol idRol) {
+        this.idRol = idRol;
     }
 
     @Override

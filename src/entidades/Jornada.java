@@ -6,14 +6,16 @@
 package entidades;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Date;
-import java.util.List;
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Lob;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
@@ -33,10 +35,8 @@ import javax.xml.bind.annotation.XmlTransient;
 @NamedQueries({
     @NamedQuery(name = "Jornada.findAll", query = "SELECT j FROM Jornada j")
     , @NamedQuery(name = "Jornada.findByIdJornada", query = "SELECT j FROM Jornada j WHERE j.idJornada = :idJornada")
-    , @NamedQuery(name = "Jornada.findByDescripcion", query = "SELECT j FROM Jornada j WHERE j.descripcion = :descripcion")
     , @NamedQuery(name = "Jornada.findByHoraInicio", query = "SELECT j FROM Jornada j WHERE j.horaInicio = :horaInicio")
-    , @NamedQuery(name = "Jornada.findByHoraFin", query = "SELECT j FROM Jornada j WHERE j.horaFin = :horaFin")
-    , @NamedQuery(name = "Jornada.findByEstado", query = "SELECT j FROM Jornada j WHERE j.estado = :estado")})
+    , @NamedQuery(name = "Jornada.findByHoraFin", query = "SELECT j FROM Jornada j WHERE j.horaFin = :horaFin")})
 public class Jornada implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -45,24 +45,38 @@ public class Jornada implements Serializable {
     @Basic(optional = false)
     @Column(name = "id_jornada")
     private Integer idJornada;
-    @Column(name = "descripcion")
-    private String descripcion;
+    @Basic(optional = false)
+    @Lob
+    @Column(name = "decripcion")
+    private String decripcion;
+    @Basic(optional = false)
     @Column(name = "hora_inicio")
     @Temporal(TemporalType.TIME)
     private Date horaInicio;
+    @Basic(optional = false)
     @Column(name = "hora_fin")
     @Temporal(TemporalType.TIME)
     private Date horaFin;
+    @Basic(optional = false)
+    @Lob
     @Column(name = "estado")
     private String estado;
-    @OneToMany(mappedBy = "idJornada")
-    private List<JornadaEmpleado> jornadaEmpleadoList;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "idJornada")
+    private Collection<JornadaEmpleado> jornadaEmpleadoCollection;
 
     public Jornada() {
     }
 
     public Jornada(Integer idJornada) {
         this.idJornada = idJornada;
+    }
+
+    public Jornada(Integer idJornada, String decripcion, Date horaInicio, Date horaFin, String estado) {
+        this.idJornada = idJornada;
+        this.decripcion = decripcion;
+        this.horaInicio = horaInicio;
+        this.horaFin = horaFin;
+        this.estado = estado;
     }
 
     public Integer getIdJornada() {
@@ -73,12 +87,12 @@ public class Jornada implements Serializable {
         this.idJornada = idJornada;
     }
 
-    public String getDescripcion() {
-        return descripcion;
+    public String getDecripcion() {
+        return decripcion;
     }
 
-    public void setDescripcion(String descripcion) {
-        this.descripcion = descripcion;
+    public void setDecripcion(String decripcion) {
+        this.decripcion = decripcion;
     }
 
     public Date getHoraInicio() {
@@ -106,12 +120,12 @@ public class Jornada implements Serializable {
     }
 
     @XmlTransient
-    public List<JornadaEmpleado> getJornadaEmpleadoList() {
-        return jornadaEmpleadoList;
+    public Collection<JornadaEmpleado> getJornadaEmpleadoCollection() {
+        return jornadaEmpleadoCollection;
     }
 
-    public void setJornadaEmpleadoList(List<JornadaEmpleado> jornadaEmpleadoList) {
-        this.jornadaEmpleadoList = jornadaEmpleadoList;
+    public void setJornadaEmpleadoCollection(Collection<JornadaEmpleado> jornadaEmpleadoCollection) {
+        this.jornadaEmpleadoCollection = jornadaEmpleadoCollection;
     }
 
     @Override

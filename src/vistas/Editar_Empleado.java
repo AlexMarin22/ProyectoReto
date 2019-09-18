@@ -44,16 +44,16 @@ public class Editar_Empleado extends javax.swing.JDialog {
     public void llenarDatos() {
         try {
             txtcedula.setText(empleado.getCedula());
-            txtnombre.setText(empleado.getNombres());
-            txtapellido.setText(empleado.getApellidos());
+            txtnombre.setText(empleado.getNombre());
+            txtapellido.setText(empleado.getApellido());
             txtusuario.setText(empleado.getUsuario());
             txtcontraseña.setText(empleado.getPassword());
-            txtfecha.setText(Fecha.getStringFecha(new java.sql.Date(empleado.getFechaDeNacimiento().getTime())));
+            txtfecha.setText(Fecha.getStringFecha(new java.sql.Date(empleado.getFechaNacimiento().getTime())));
             txtdireccion.setText(empleado.getDireccion());
             txttelefono.setText(empleado.getTelefono());
             System.out.println("Cedula.." + empleado.getCedula());
-            System.out.println("Nombre.." + empleado.getNombres());
-            System.out.println("Apellido.." + empleado.getApellidos());
+            System.out.println("Nombre.." + empleado.getNombre());
+            System.out.println("Apellido.." + empleado.getApellido());
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, e.getMessage());
         }
@@ -350,17 +350,19 @@ public class Editar_Empleado extends javax.swing.JDialog {
     }//GEN-LAST:event_txtcontraseñaActionPerformed
 
     private void btnsalirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnsalirActionPerformed
+Consulta_Empleados con = new Consulta_Empleados(new javax.swing.JFrame(),true);
         setVisible(false);
+        con.setVisible(true);
     }//GEN-LAST:event_btnsalirActionPerformed
 
     private void btnguardarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnguardarActionPerformed
         try {
             empleado.setCedula(txtcedula.getText());
-            empleado.setNombres(txtnombre.getText());
-            empleado.setApellidos(txtapellido.getText());
+            empleado.setNombre(txtnombre.getText());
+            empleado.setApellido(txtapellido.getText());
             empleado.setUsuario(txtusuario.getText());
             empleado.setPassword(txtcontraseña.getText());
-            empleado.setFechaDeNacimiento(empleado.getFechaDeNacimiento());
+            empleado.setFechaNacimiento(empleado.getFechaNacimiento());
             empleado.setDireccion(txtdireccion.getText());
             empleado.setTelefono(txttelefono.getText());
             empleado.setObservacion(cbxcargo.getSelectedItem().toString());

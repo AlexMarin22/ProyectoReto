@@ -13,6 +13,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
@@ -28,8 +29,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "JornadaEmpleado.findAll", query = "SELECT j FROM JornadaEmpleado j")
-    , @NamedQuery(name = "JornadaEmpleado.findByIdJornadaEmpleado", query = "SELECT j FROM JornadaEmpleado j WHERE j.idJornadaEmpleado = :idJornadaEmpleado")
-    , @NamedQuery(name = "JornadaEmpleado.findByEstado", query = "SELECT j FROM JornadaEmpleado j WHERE j.estado = :estado")})
+    , @NamedQuery(name = "JornadaEmpleado.findByIdJornadaEmpleado", query = "SELECT j FROM JornadaEmpleado j WHERE j.idJornadaEmpleado = :idJornadaEmpleado")})
 public class JornadaEmpleado implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -38,20 +38,27 @@ public class JornadaEmpleado implements Serializable {
     @Basic(optional = false)
     @Column(name = "id_jornada_empleado")
     private Integer idJornadaEmpleado;
+    @Basic(optional = false)
+    @Lob
     @Column(name = "estado")
     private String estado;
-    @JoinColumn(name = "id_empleado", referencedColumnName = "id_empleado")
-    @ManyToOne
-    private Empleados idEmpleado;
     @JoinColumn(name = "id_jornada", referencedColumnName = "id_jornada")
-    @ManyToOne
+    @ManyToOne(optional = false)
     private Jornada idJornada;
+    @JoinColumn(name = "id_empleados", referencedColumnName = "id_empleados")
+    @ManyToOne(optional = false)
+    private Empleados idEmpleados;
 
     public JornadaEmpleado() {
     }
 
     public JornadaEmpleado(Integer idJornadaEmpleado) {
         this.idJornadaEmpleado = idJornadaEmpleado;
+    }
+
+    public JornadaEmpleado(Integer idJornadaEmpleado, String estado) {
+        this.idJornadaEmpleado = idJornadaEmpleado;
+        this.estado = estado;
     }
 
     public Integer getIdJornadaEmpleado() {
@@ -70,20 +77,20 @@ public class JornadaEmpleado implements Serializable {
         this.estado = estado;
     }
 
-    public Empleados getIdEmpleado() {
-        return idEmpleado;
-    }
-
-    public void setIdEmpleado(Empleados idEmpleado) {
-        this.idEmpleado = idEmpleado;
-    }
-
     public Jornada getIdJornada() {
         return idJornada;
     }
 
     public void setIdJornada(Jornada idJornada) {
         this.idJornada = idJornada;
+    }
+
+    public Empleados getIdEmpleados() {
+        return idEmpleados;
+    }
+
+    public void setIdEmpleados(Empleados idEmpleados) {
+        this.idEmpleados = idEmpleados;
     }
 
     @Override

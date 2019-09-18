@@ -11,8 +11,8 @@ import javax.persistence.Query;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
-import entidades.Empleados;
 import entidades.Jornada;
+import entidades.Empleados;
 import entidades.JornadaEmpleado;
 import java.util.List;
 import javax.persistence.EntityManager;
@@ -26,7 +26,7 @@ import javax.persistence.Persistence;
 public class JornadaEmpleadoJpaController implements Serializable {
 
     public JornadaEmpleadoJpaController() {
-              this.emf = Persistence.createEntityManagerFactory("ProyectoPU") ;
+        this.emf = Persistence.createEntityManagerFactory("Proyecto1PU");
     }
     private EntityManagerFactory emf = null;
 
@@ -39,24 +39,24 @@ public class JornadaEmpleadoJpaController implements Serializable {
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            Empleados idEmpleado = jornadaEmpleado.getIdEmpleado();
-            if (idEmpleado != null) {
-                idEmpleado = em.getReference(idEmpleado.getClass(), idEmpleado.getIdEmpleado());
-                jornadaEmpleado.setIdEmpleado(idEmpleado);
-            }
             Jornada idJornada = jornadaEmpleado.getIdJornada();
             if (idJornada != null) {
                 idJornada = em.getReference(idJornada.getClass(), idJornada.getIdJornada());
                 jornadaEmpleado.setIdJornada(idJornada);
             }
-            em.persist(jornadaEmpleado);
-            if (idEmpleado != null) {
-                idEmpleado.getJornadaEmpleadoList().add(jornadaEmpleado);
-                idEmpleado = em.merge(idEmpleado);
+            Empleados idEmpleados = jornadaEmpleado.getIdEmpleados();
+            if (idEmpleados != null) {
+                idEmpleados = em.getReference(idEmpleados.getClass(), idEmpleados.getIdEmpleados());
+                jornadaEmpleado.setIdEmpleados(idEmpleados);
             }
+            em.persist(jornadaEmpleado);
             if (idJornada != null) {
-                idJornada.getJornadaEmpleadoList().add(jornadaEmpleado);
+                idJornada.getJornadaEmpleadoCollection().add(jornadaEmpleado);
                 idJornada = em.merge(idJornada);
+            }
+            if (idEmpleados != null) {
+                idEmpleados.getJornadaEmpleadoCollection().add(jornadaEmpleado);
+                idEmpleados = em.merge(idEmpleados);
             }
             em.getTransaction().commit();
         } finally {
@@ -72,34 +72,34 @@ public class JornadaEmpleadoJpaController implements Serializable {
             em = getEntityManager();
             em.getTransaction().begin();
             JornadaEmpleado persistentJornadaEmpleado = em.find(JornadaEmpleado.class, jornadaEmpleado.getIdJornadaEmpleado());
-            Empleados idEmpleadoOld = persistentJornadaEmpleado.getIdEmpleado();
-            Empleados idEmpleadoNew = jornadaEmpleado.getIdEmpleado();
             Jornada idJornadaOld = persistentJornadaEmpleado.getIdJornada();
             Jornada idJornadaNew = jornadaEmpleado.getIdJornada();
-            if (idEmpleadoNew != null) {
-                idEmpleadoNew = em.getReference(idEmpleadoNew.getClass(), idEmpleadoNew.getIdEmpleado());
-                jornadaEmpleado.setIdEmpleado(idEmpleadoNew);
-            }
+            Empleados idEmpleadosOld = persistentJornadaEmpleado.getIdEmpleados();
+            Empleados idEmpleadosNew = jornadaEmpleado.getIdEmpleados();
             if (idJornadaNew != null) {
                 idJornadaNew = em.getReference(idJornadaNew.getClass(), idJornadaNew.getIdJornada());
                 jornadaEmpleado.setIdJornada(idJornadaNew);
             }
+            if (idEmpleadosNew != null) {
+                idEmpleadosNew = em.getReference(idEmpleadosNew.getClass(), idEmpleadosNew.getIdEmpleados());
+                jornadaEmpleado.setIdEmpleados(idEmpleadosNew);
+            }
             jornadaEmpleado = em.merge(jornadaEmpleado);
-            if (idEmpleadoOld != null && !idEmpleadoOld.equals(idEmpleadoNew)) {
-                idEmpleadoOld.getJornadaEmpleadoList().remove(jornadaEmpleado);
-                idEmpleadoOld = em.merge(idEmpleadoOld);
-            }
-            if (idEmpleadoNew != null && !idEmpleadoNew.equals(idEmpleadoOld)) {
-                idEmpleadoNew.getJornadaEmpleadoList().add(jornadaEmpleado);
-                idEmpleadoNew = em.merge(idEmpleadoNew);
-            }
             if (idJornadaOld != null && !idJornadaOld.equals(idJornadaNew)) {
-                idJornadaOld.getJornadaEmpleadoList().remove(jornadaEmpleado);
+                idJornadaOld.getJornadaEmpleadoCollection().remove(jornadaEmpleado);
                 idJornadaOld = em.merge(idJornadaOld);
             }
             if (idJornadaNew != null && !idJornadaNew.equals(idJornadaOld)) {
-                idJornadaNew.getJornadaEmpleadoList().add(jornadaEmpleado);
+                idJornadaNew.getJornadaEmpleadoCollection().add(jornadaEmpleado);
                 idJornadaNew = em.merge(idJornadaNew);
+            }
+            if (idEmpleadosOld != null && !idEmpleadosOld.equals(idEmpleadosNew)) {
+                idEmpleadosOld.getJornadaEmpleadoCollection().remove(jornadaEmpleado);
+                idEmpleadosOld = em.merge(idEmpleadosOld);
+            }
+            if (idEmpleadosNew != null && !idEmpleadosNew.equals(idEmpleadosOld)) {
+                idEmpleadosNew.getJornadaEmpleadoCollection().add(jornadaEmpleado);
+                idEmpleadosNew = em.merge(idEmpleadosNew);
             }
             em.getTransaction().commit();
         } catch (Exception ex) {
@@ -130,15 +130,15 @@ public class JornadaEmpleadoJpaController implements Serializable {
             } catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The jornadaEmpleado with id " + id + " no longer exists.", enfe);
             }
-            Empleados idEmpleado = jornadaEmpleado.getIdEmpleado();
-            if (idEmpleado != null) {
-                idEmpleado.getJornadaEmpleadoList().remove(jornadaEmpleado);
-                idEmpleado = em.merge(idEmpleado);
-            }
             Jornada idJornada = jornadaEmpleado.getIdJornada();
             if (idJornada != null) {
-                idJornada.getJornadaEmpleadoList().remove(jornadaEmpleado);
+                idJornada.getJornadaEmpleadoCollection().remove(jornadaEmpleado);
                 idJornada = em.merge(idJornada);
+            }
+            Empleados idEmpleados = jornadaEmpleado.getIdEmpleados();
+            if (idEmpleados != null) {
+                idEmpleados.getJornadaEmpleadoCollection().remove(jornadaEmpleado);
+                idEmpleados = em.merge(idEmpleados);
             }
             em.remove(jornadaEmpleado);
             em.getTransaction().commit();
