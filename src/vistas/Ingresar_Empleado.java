@@ -23,7 +23,9 @@ public class Ingresar_Empleado extends javax.swing.JDialog {
     EmpleadosJpaController cemp = new EmpleadosJpaController();
     RolEmpleados rol;
     java.util.Date fechaActual = new java.util.Date();
-private Date fecha1 = null;
+    private Date fecha1 = null;
+    java.util.Date fecha_Actual = new java.util.Date();
+
     /**
      * Creates new form Ingresar_Empleado
      */
@@ -327,7 +329,9 @@ private Date fecha1 = null;
     }//GEN-LAST:event_txtcontraseñaActionPerformed
 
     private void btnsalirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnsalirActionPerformed
+        Consulta_Empleados con = new Consulta_Empleados(new javax.swing.JFrame(),true);
         setVisible(false);
+        con.setVisible(true);
     }//GEN-LAST:event_btnsalirActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
@@ -335,26 +339,35 @@ private Date fecha1 = null;
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void btnguardarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnguardarActionPerformed
-        try {
-            Empleados emp = new Empleados();
-            emp.setCedula(txtcedula.getText());
-            emp.setNombres(txtnombre.getText());
-            emp.setApellidos(txtapellido.getText());
-            emp.setUsuario(txtusuario.getText());
-            emp.setPassword(txtcontraseña.getText());
-            emp.setObservacion(cbxcargo.getSelectedItem().toString());
-            emp.setFechaDeNacimiento(fecha1);
-            emp.setDireccion(txtdireccion.getText());
-            emp.setTelefono(txttelefono.getText());
-            emp.setFechaActivacion(fechaActual);
-            emp.setEstado("A");
-            cemp.create(emp);
-            Consulta_Empleados con = new Consulta_Empleados(new javax.swing.JFrame() ,true);
-            setVisible(false);
-            con.setVisible(true);
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, e.getMessage());
+        if (txtcedula.getText() == "" || txtnombre.getText() == "" || txtapellido.getText() == ""
+                || txtusuario.getText() == "" || txtcontraseña.getText() == ""
+                || txtfecha.getText() == "" || txtdireccion.getText() == "" || txttelefono.getText() == "") {
+            JOptionPane.showMessageDialog(null, "Ingrese datos..");
+
+        } else {
+            try {
+                Empleados emp = new Empleados();
+                emp.setCedula(txtcedula.getText());
+                emp.setNombre(txtnombre.getText());
+                emp.setApellido(txtapellido.getText());
+                emp.setUsuario(txtusuario.getText());
+                emp.setPassword(txtcontraseña.getText());
+                emp.setObservacion(cbxcargo.getSelectedItem().toString());
+                emp.setFechaNacimiento(fecha1);
+                emp.setDireccion(txtdireccion.getText());
+                emp.setTelefono(txttelefono.getText());
+                emp.setFechaActivacion(fechaActual);
+                emp.setFechaActivacion(fechaActual);
+                emp.setEstado("A");
+                cemp.create(emp);
+                Consulta_Empleados con = new Consulta_Empleados(new javax.swing.JFrame(), true);
+                setVisible(false);
+                con.setVisible(true);
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(null, e.getMessage());
+            }
         }
+
 
     }//GEN-LAST:event_btnguardarActionPerformed
 
@@ -367,7 +380,7 @@ private Date fecha1 = null;
     }//GEN-LAST:event_txttelefonoActionPerformed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-  Calendario calen = new Calendario(new javax.swing.JFrame(), true);
+        Calendario calen = new Calendario(new javax.swing.JFrame(), true);
         calen.setVisible(true);
         fecha1 = calen.getFecha();
         int com = Fecha.compararFecha(fecha1, (Date) Fecha.FechaSql());
