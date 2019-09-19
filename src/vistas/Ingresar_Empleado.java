@@ -34,6 +34,7 @@ public class Ingresar_Empleado extends javax.swing.JDialog {
         setUndecorated(modal);
         initComponents();
         setLocationRelativeTo(this);
+        
     }
 
     /**
@@ -356,7 +357,6 @@ public class Ingresar_Empleado extends javax.swing.JDialog {
                 emp.setFechaNacimiento(fecha1);
                 emp.setDireccion(txtdireccion.getText());
                 emp.setTelefono(txttelefono.getText());
-                emp.setFechaActivacion(fechaActual);
                 emp.setFechaActivacion(fechaActual);
                 emp.setEstado("A");
                 cemp.create(emp);

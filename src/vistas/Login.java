@@ -5,15 +5,22 @@
  */
 package vistas;
 
+import controladores.EmpleadosJpaController;
+import entidades.Empleados;
 import java.awt.Image;
+import java.util.List;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
+import javax.swing.JOptionPane;
 
 /**
  *
  * @author user
  */
 public class Login extends javax.swing.JDialog {
+
+    List<Empleados> e;
+    EmpleadosJpaController emp;
 
     /**
      * Creates new form Login
@@ -27,12 +34,14 @@ public class Login extends javax.swing.JDialog {
         setLocationRelativeTo(null);
         imagenes();
     }
-   public void imagenes() {
+
+    public void imagenes() {
         Image logof = new ImageIcon(System.getProperty("user.dir") + "/src/Imagen/Proyecto/util/Avatar.png").getImage();
         Icon avatar = new ImageIcon(logof.getScaledInstance(lbImagen.getWidth(), lbImagen.getHeight(), Image.SCALE_DEFAULT));
         lbImagen.setIcon(avatar);
         this.repaint();
     }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -192,18 +201,39 @@ public class Login extends javax.swing.JDialog {
     }//GEN-LAST:event_txtcontraseñaActionPerformed
 
     private void btnentrarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnentrarActionPerformed
-Consulta_Empleados con = new Consulta_Empleados(new javax.swing.JFrame(),true);
-        setVisible(false);
-        con.setVisible(true);
+
+        IniciarSesion();
     }//GEN-LAST:event_btnentrarActionPerformed
 
     private void btnsalirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnsalirActionPerformed
-System.exit(0);
+        System.exit(0);
     }//GEN-LAST:event_btnsalirActionPerformed
 
     private void txtusuarioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtusuarioActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_txtusuarioActionPerformed
+    public void IniciarSesion() {
+        String usuario = txtusuario.getText();
+        String contra = txtcontraseña.getText();
+        if (txtusuario.getText().length() < 4) {
+            JOptionPane.showMessageDialog(null, "Ingrese un usuario válido");
+        } else if (txtusuario.getText().length() < 4) {
+            JOptionPane.showMessageDialog(null, "Ingrese una contraseña válida");
+        } else {
+            e = emp.findEmpleadosEntities();
+            System.out.println("Error.." + e.getClass().getName());
+            for (int i = 0; i < e.size(); i++) {
+                if (e.get(i).getUsuario().equals(usuario)) {
+                    if (e.get(i).getPassword().equals(contra)) {
+                        Consulta_Empleados con = new Consulta_Empleados(new javax.swing.JFrame(), true);
+                        setVisible(false);
+                        con.setVisible(true);
+                    }
+                }
+            }
+
+        }
+    }
 
     /**
      * @param args the command line arguments
